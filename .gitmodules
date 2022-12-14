@@ -1,0 +1,9 @@
+[submodule "SAPPOROBDD"]
+	path = SAPPOROBDD
+	url = https://github.com/Shin-ichi-Minato/SAPPOROBDD.git
+[submodule "TdZdd"]
+	path = TdZdd
+	url = https://github.com/kunisura/TdZdd.git
+[submodule "sbdd_helper"]
+	path = sbdd_helper
+	url = https://github.com/junkawahara/sbdd_helper.git
