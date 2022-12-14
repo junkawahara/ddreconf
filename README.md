@@ -4,6 +4,12 @@ A ZDD-based solver for various reconfiguration problems.
 
 ## usage
 
+To clone the repository, use `git clone` with `--recursive` option as follows because the program uses git submodule.
+
+```bash
+git clone --recursive https://github.com/junkawahara/ddreconf.git
+```
+
 To compile the program, run the following:
 
 ```bash
