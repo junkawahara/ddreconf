@@ -2,7 +2,7 @@
 
 A ZDD-based solver for various reconfiguration problems.
 
-## usage
+## Usage
 
 To clone the repository, use `git clone` with `--recursive` option as follows because the program uses git submodule.
 
@@ -92,3 +92,9 @@ It finds a longest reconfiguration sequence from a random s.
 ```bash
 ./ddreconf sample/hc-square-01.col --indset --randstart --longest
 ```
+
+## License
+
+[MIT License](LICENSE)
+
+This work was supported by JSPS KAKENHI Grant Numbers JP18H04091, JP20H05792, and JP20H05794.
