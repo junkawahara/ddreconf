@@ -136,10 +136,11 @@ int main(int argc, char** argv) {
 
 #ifdef STAND_ALONE
     num_vertices = parse_DIMACS(std::cin, &graph, &start_set, &goal_set,
-                                &root_set, &colors);
+                                &root_set, &colors, option.isEdgeVariable());
 #else
     num_vertices = parse_DIMACS(option.graph_filename.c_str(), &graph,
-                                &start_set, &goal_set, &root_set, &colors);
+                                &start_set, &goal_set, &root_set, &colors,
+                                option.isEdgeVariable());
 #endif
 
     if (option.st_file) {
@@ -148,7 +149,7 @@ int main(int argc, char** argv) {
         goal_set.clear();
         //goal_set.shrink_to_fit();
         parse_stfile(option.st_filename.c_str(), &graph,
-                     &start_set, &goal_set);
+                     &start_set, &goal_set, option.isEdgeVariable());
     }
 
     if (option.show_info) {
@@ -173,6 +174,8 @@ int main(int argc, char** argv) {
     }
 
     if (option.isEdgeVariable()) {
+        // change edge IDs to SAPPOROBDD variable numbers
+        // from 1,...,m to m,...,1
         start_set = inverseSet(start_set, graph.edgeSize() + 1);
         goal_set = inverseSet(goal_set, graph.edgeSize() + 1);
     }

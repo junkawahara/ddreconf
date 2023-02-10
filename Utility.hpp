@@ -93,7 +93,8 @@ int parse_DIMACS(std::istream& ist, Graph* graph,
                  std::set<bddvar>* start_set,
                  std::set<bddvar>* goal_set,
                  std::set<std::string>* root_set,
-                 std::vector<int>* colors)
+                 std::vector<int>* colors,
+                 bool is_edge_variable)
 {
     int num_vertices = -1;
     int num_edges = -1;
@@ -140,7 +141,11 @@ int parse_DIMACS(std::istream& ist, Graph* graph,
             bddvar bv;
             iss >> st; // skip first char
             while (iss >> bv) {
-                vec->insert(outerVertexToInner(*graph, bv));
+                if (is_edge_variable) {
+                    vec->insert(bv);
+                } else {
+                    vec->insert(outerVertexToInner(*graph, bv));
+                }
             }
             if (s[0] == 's') {
                 read_s = true;
@@ -184,7 +189,7 @@ int parse_DIMACS(std::istream& ist, Graph* graph,
 
 int parse_DIMACS(const char* filename, Graph* graph, std::set<bddvar>* start_set,
                  std::set<bddvar>* goal_set, std::set<std::string>* root_set,
-                 std::vector<int>* colors)
+                 std::vector<int>* colors, bool is_edge_variable)
 {
     std::ifstream ifs;
     ifs.open(filename);
@@ -192,11 +197,11 @@ int parse_DIMACS(const char* filename, Graph* graph, std::set<bddvar>* start_set
         std::cerr << "File " << filename << " cannot be opened." << std::endl;
         exit(1);
     }
-    return parse_DIMACS(ifs, graph, start_set, goal_set, root_set, colors);
+    return parse_DIMACS(ifs, graph, start_set, goal_set, root_set, colors, is_edge_variable);
 }
 
 void parse_stfile(const char* filename, Graph* graph, std::set<bddvar>* start_set,
-                  std::set<bddvar>* goal_set)
+                  std::set<bddvar>* goal_set, bool is_edge_variable)
 {
     std::ifstream ifs;
     ifs.open(filename);
@@ -214,7 +219,11 @@ void parse_stfile(const char* filename, Graph* graph, std::set<bddvar>* start_se
             bddvar bv;
             iss >> st; // skip first char
             while (iss >> bv) {
-                vec->insert(outerVertexToInner(*graph, bv));
+                if (is_edge_variable) {
+                    vec->insert(bv);
+                } else {
+                    vec->insert(outerVertexToInner(*graph, bv));
+                }
             }
         }
     }
