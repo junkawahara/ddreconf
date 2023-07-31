@@ -137,6 +137,22 @@ public:
         }
     }
 
+    void findReconfSeqAndWidth(const std::set<bddvar>& start_set,
+                               const std::set<bddvar>& goal_set)
+    {
+        mode_ = ST;
+        F_.clear();
+        int step = reconfigureForWidth(start_set, goal_set);
+        if (step < 0) {
+            std::cout << "a NO" << std::endl;
+        } else {
+            std::cout << "a YES" << std::endl;
+            std::list<std::set<bddvar> > sequence;
+            backtrack(start_set, goal_set, F_, &sequence);
+            outputSequence(sequence, std::cout);
+        }
+    }
+
     void findReconfLongestSeq(const std::set<bddvar>& start_set)
     {
         mode_ = LONGEST;
@@ -272,9 +288,10 @@ public:
             std::cerr << "size = " << next_zdd.Size() << std::endl;
             std::cerr << "card = " << getCard(next_zdd) << std::endl;
         } else if (show_info_) {
+            DDNodeIndex index(next_zdd, false);
             std::cerr << "time = " << (getTime() - total_start_time)
-                      << ", size = " << next_zdd.Size()
-                      << ", card = " << getCard(next_zdd) << std::endl;
+                      << ", # ZDD nodes = " << index.size()
+                      << ", # elems = " << getCard(next_zdd) << std::endl;
         }
         if (next_zdd == ZBDD(-1)) {
             std::cerr << "Cannot construct a ZDD due to the memory shortage" << std::endl;
@@ -337,6 +354,88 @@ public:
             }
         }
         // never come here
+    }
+
+    // return -1 if the reconf seq is not found
+    // otherwise, the returned value is the positive integer
+    // representing the number of steps
+    int reconfigureForWidth(const std::set<bddvar>& start_set,
+                            const std::set<bddvar>& goal_set)
+    {
+        assert(mode_ == ST);
+
+        int shortest_length = (1 << 28);
+        bool found_shortest = false;
+
+        if (!isMemberZ(solution_space_zdd_, start_set)) {
+            std::cerr << "The start set is not in the solution space." << std::endl;
+            exit(2);
+        }
+        if (mode_ == ST) {
+            if (!isMemberZ(solution_space_zdd_, goal_set)) {
+                std::cerr << "The goal set is not in the solution space." << std::endl;
+                exit(3);
+            }
+        }
+        ZBDD start_zdd = getSingleSet(start_set);
+        F_.push_back(start_zdd);
+        ZBDD goal_zdd = getSingleSet(goal_set);
+        Fg_.push_back(goal_zdd);
+
+        int step;
+        for (step = 1; step <= shortest_length * 2; ++step) {
+            if (show_info_) {
+                if (step % 2 == 1) {
+                    std::cerr << "Zs_";
+                } else {
+                    std::cerr << "Zt_";
+                }
+                std::cerr << ((step + 1) / 2) << " construction ";
+            }
+            std::vector<ZBDD>& Fc = (step % 2 == 1 ? F_ : Fg_);
+
+            ZBDD previous_zdd = ZBDD(0); // empty zdd
+            if (Fc.size() >= 2) {
+                previous_zdd = Fc[Fc.size() - 2];
+            }
+
+            ZBDD next_zdd = getNextStep(Fc.back(), previous_zdd);
+            if (next_zdd.Card() == 0) {
+                return -1;
+            }
+            Fc.push_back(next_zdd);
+
+            // check whether goal_set is in next_zdd
+            if (!found_shortest) {
+                if ((F_.back() & Fg_.back()) != ZBDD(0)) {
+                    // shortest sequence found
+                    found_shortest = true;
+                    shortest_length = step;
+                    if (show_info_) {
+                        std::cerr << "Reconf seq found. Shortest length = " << shortest_length << std::endl;
+                    }
+                    //return step;
+                }
+            }
+
+            if (is_gc_ && step % 1000 == 0) {
+                BDD_GC();
+            }
+        }
+        int max_card = 0;
+        int max_card_i = -1;
+        for (int i = 0; i <= shortest_length; ++i) {
+            int rev = shortest_length - i;
+            int card = (F_[i] & Fg_[rev]).Card();
+            std::cerr << "Card(Zs_" << i << " & Zt_" << rev << ") = " << card << std::endl;
+            if (card > max_card) {
+                max_card = card;
+                max_card_i = i;
+            }
+        }
+        std::cerr << "max card = " << max_card << std::endl;
+        std::cerr << "max card index = " << max_card_i << std::endl;
+        return (found_shortest ? shortest_length : -1);
     }
 
     // Assume that zdd_sequence[0] is a ZDD containing only start_set,

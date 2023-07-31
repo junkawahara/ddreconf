@@ -77,6 +77,8 @@ int main(int argc, char** argv) {
                   << std::endl;
         std::cout << "  --stb: computes the reconf sequence from s to t in the bidirection"
                   << std::endl;
+        std::cout << "  --stwidth: computes the width of the solution space graph"
+                  << std::endl;
         std::cout << "  --stfile=<file_name>: specifies s and t"
                   << " in file <file_name>" << std::endl;
         std::cout << "  --longest: computes the longest reconf seq"
@@ -338,6 +340,12 @@ int main(int argc, char** argv) {
                       << std::endl;
         }
         reconf.findReconfSeqBoth(start_set, goal_set);
+    } else if (option.stw_mode) {
+        if (option.show_info) {
+            std::cerr << "Start computing the width of the solution space graph"
+                      << std::endl;
+        }
+        reconf.findReconfSeqAndWidth(start_set, goal_set);
     } else if (option.st_mode) {
         if (option.show_info) {
             std::cerr << "Start searching a reconfiguration sequence "

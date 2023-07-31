@@ -34,6 +34,7 @@ public:
     bool is_enum = false;
     bool st_mode = false;
     bool stb_mode = false;
+    bool stw_mode = false;
     bool st_file = false;
     bool zdd_dir = false;
     bool longest_mode = false;
@@ -77,6 +78,10 @@ public:
             } else if (std::string(argv[i]) == std::string("--stb")) {
                 st_mode = true;
                 stb_mode = true;
+            } else if (std::string(argv[i]) == std::string("--stw")
+                       || std::string(argv[i]) == std::string("--stwidth")) {
+                st_mode = true;
+                stw_mode = true;
             } else if (std::string(argv[i]).find(std::string("--stfile=")) == 0) {
                 st_file = true;
                 st_filename = std::string(argv[i]).substr(9);
