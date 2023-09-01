@@ -268,8 +268,6 @@ int main(int argc, char** argv) {
                   << getCard(solution_space_zdd) << std::endl;
     }
 
-    end_time = start_time;
-
     if (option.is_enum) {
         int num_elements = (option.isEdgeVariable()
                                 ? graph.edgeSize() : num_vertices);
