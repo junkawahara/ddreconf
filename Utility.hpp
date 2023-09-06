@@ -98,6 +98,7 @@ int parse_DIMACS(std::istream& ist, Graph* graph,
 {
     int num_vertices = -1;
     int num_edges = -1;
+    int current_num_edges = 0;
     bool read_s = false;
     bool read_t = false;
 
@@ -121,7 +122,7 @@ int parse_DIMACS(std::istream& ist, Graph* graph,
                           << std::endl;
                 exit(1);
             }
-            if (num_edges < 0 || graph->edgeSize() < num_edges) {
+            if (num_edges < 0 || current_num_edges < num_edges) {
                 std::istringstream iss(s);
                 std::string kind, e1, e2;
                 iss >> kind >> e1 >> e2;
@@ -132,7 +133,8 @@ int parse_DIMACS(std::istream& ist, Graph* graph,
                     exit(1);
                 }
                 graph->addEdge(e1, e2);
-                graph->update();
+                ++current_num_edges;
+                //graph->update(); // too slow
             }
         } else if (s[0] == 's' || s[0] == 't') {
             std::set<bddvar>* vec = (s[0] == 's' ? start_set : goal_set);
@@ -176,7 +178,7 @@ int parse_DIMACS(std::istream& ist, Graph* graph,
             exit(1);
         }
         if (read_s && read_t &&
-            num_edges >= 0 && graph->edgeSize() >= num_edges) {
+            num_edges >= 0 && current_num_edges >= num_edges) {
             // We will not read input anymore.
             //std::cerr << "break" << std::endl;
             break;
