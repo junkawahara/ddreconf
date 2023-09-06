@@ -66,6 +66,8 @@ enum Model {TJ, TS, TAR};
 
 #include "MaxEval.hpp"
 
+static const int recursion_limit = 8192; // recursion limit in SAPPOROBDD
+
 int main(int argc, char** argv) {
 
 #ifndef STAND_ALONE
@@ -149,6 +151,20 @@ int main(int argc, char** argv) {
                                 &start_set, &goal_set, &root_set, &colors,
                                 option.isEdgeVariable());
 #endif
+
+    if (option.isEdgeVariable()) {
+        if (graph.edgeSize() >= recursion_limit) {
+            std::cerr << "The number of edges must be less than "
+                << recursion_limit << "." << std::endl;
+            return -1;
+        }
+    } else {
+        if (num_vertices >= recursion_limit) {
+            std::cerr << "The number of vertices must be less than "
+                << recursion_limit << "." << std::endl;
+            return -1;
+        }
+    }
 
     if (option.st_file) {
         start_set.clear();
