@@ -60,6 +60,7 @@ enum Model {TJ, TS, TAR};
 #include "Path.hpp"
 #include "ForestOrTree.hpp"
 #include "SteinerSubgraph.hpp"
+#include "ConnectedInducedSubgraph.hpp"
 
 #include "Reconf.hpp"
 
@@ -191,17 +192,17 @@ int main(int argc, char** argv) {
     ZBDD solution_space_zdd;
     switch (option.sol_kind) {
     case IND_SET:
-        space = new IndependentSet(graph, num_vertices, true, option.show_info);
+        space = new IndependentSet(graph, num_vertices, true, false, option.show_info);
         break;
     case CLIQUE:
         space = new Clique(graph, num_vertices, option.show_info);
         break;
     case VERTEX_COVER:
         // use IndependentSet class with argument is_independent_set == false
-        space = new IndependentSet(graph, num_vertices, false, option.show_info);
+        space = new IndependentSet(graph, num_vertices, false, false, option.show_info);
         break;
     case DOMINATING_SET:
-        space = new DominatingSet(graph, num_vertices, option.show_info);
+        space = new DominatingSet(graph, num_vertices, false, option.show_info);
         break;
     case MATCHING:
     case CMATCHING:
@@ -253,6 +254,17 @@ int main(int argc, char** argv) {
                                         option.show_info);
         }
         break;
+    case CIS_E:
+        space = new ConnectedInducedSubgraph(graph, false, option.show_info);
+        break;
+    case CIS_V:
+        space = new ConnectedInducedSubgraph(graph, true, option.show_info);
+        break;
+    case CONNECTED_DOMINATING_SET:
+        space = new DominatingSet(graph, num_vertices, true, option.show_info);
+        break;
+    case CONNECTED_VERTEX_COVER:
+        space = new IndependentSet(graph, num_vertices, false, true, option.show_info);
         break;
     }
 

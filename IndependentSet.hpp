@@ -24,6 +24,7 @@
 
 #include "SolutionSpace.hpp"
 #include "AdjacentSpec.hpp"
+#include "ConnectedInducedSubgraph.hpp"
 
 class IndependentSet : public SolutionSpace {
 private:
@@ -33,12 +34,15 @@ private:
     // If it is false, we make a ZDD
     // representing vertex covers instead of independent sets.
     const bool is_independent_set_;
+    const bool is_connected_;
 
 public:
     IndependentSet(const tdzdd::Graph& graph, int num_vertices,
-                   bool is_independent_set, bool show_info)
+                   bool is_independent_set,
+                   bool is_connected, bool show_info)
         : SolutionSpace(num_vertices), graph_(graph),
-          is_independent_set_(is_independent_set), show_info_(show_info) { }
+          is_independent_set_(is_independent_set),
+          is_connected_(is_connected), show_info_(show_info) { }
 
     virtual ZBDD createSolutionSpaceZdd()
     {
@@ -66,6 +70,11 @@ public:
                 std::cerr << "Cannot construct the indepndent set ZDD due to memory shortage." << std::endl;
                 exit(1);
             }
+        }
+
+        if (is_connected_) {
+            ConnectedInducedSubgraph cis(graph_, true, show_info_);
+            independent_set_zdd &= cis.createSolutionSpaceZdd();
         }
 
         return independent_set_zdd;

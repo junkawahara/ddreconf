@@ -22,10 +22,12 @@
 #ifndef OPTION_HPP
 #define OPTION_HPP
 
-enum SolKind {IND_SET, CLIQUE, VERTEX_COVER, DOMINATING_SET,
+enum SolKind {IND_SET, CLIQUE, VERTEX_COVER, CONNECTED_VERTEX_COVER,
+              DOMINATING_SET, CONNECTED_DOMINATING_SET,
               MATCHING, CMATCHING, PATH,
               TREE, SP_TREE, FOREST, R_SP_FOREST, ST_TREE,
               STEINER_SUB, STEINER_CYCLE, CIS_E, CIS_V};
+
 struct Option {
 public:
     bool show_info = true;
@@ -60,7 +62,8 @@ public:
             || sol_kind == R_SP_FOREST
             || sol_kind == ST_TREE
             || sol_kind == STEINER_SUB
-            || sol_kind == STEINER_CYCLE;
+            || sol_kind == STEINER_CYCLE
+            || sol_kind == CIS_E;
     }
 
     void parse(int argc, char** argv)
@@ -119,9 +122,15 @@ public:
             } else if (std::string(argv[i]) == std::string("--vertexcover")
                        || std::string(argv[i]) == std::string("--vc")) {
                 sol_kind = VERTEX_COVER;
+            } else if (std::string(argv[i]) == std::string("--connectedvertexcover")
+                       || std::string(argv[i]) == std::string("--cvc")) {
+                sol_kind = CONNECTED_VERTEX_COVER;
             } else if (std::string(argv[i]) == std::string("--dominatingset")
                        || std::string(argv[i]) == std::string("--ds")) {
                 sol_kind = DOMINATING_SET;
+            } else if (std::string(argv[i]) == std::string("--connecteddominatingset")
+                       || std::string(argv[i]) == std::string("--cds")) {
+                sol_kind = CONNECTED_DOMINATING_SET;
             } else if (std::string(argv[i]) == std::string("--matching")) {
                 sol_kind = MATCHING;
             } else if (std::string(argv[i]) == std::string("--cmatching")
@@ -148,6 +157,12 @@ public:
             } else if (std::string(argv[i]) == std::string("--stcycle")
                        || std::string(argv[i]) == std::string("--steinercycle")) {
                 sol_kind = STEINER_CYCLE;
+            } else if (std::string(argv[i]) == std::string("--cise")
+                       || std::string(argv[i]) == std::string("--connectedinducedsubgraphedge")) {
+                sol_kind = CIS_E;
+            }else if (std::string(argv[i]) == std::string("--cisv")
+                       || std::string(argv[i]) == std::string("--connectedinducedsubgraphvertex")) {
+                sol_kind = CIS_V;
             } else if (argv[i][0] == '-') {
                 std::cerr << "Unknown option: " << argv[i] << std::endl;
                 exit(1);

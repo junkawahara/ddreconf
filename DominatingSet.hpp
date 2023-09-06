@@ -24,16 +24,20 @@
 
 #include "SolutionSpace.hpp"
 #include "VariableConditionSpec.hpp"
+#include "ConnectedInducedSubgraph.hpp"
 
 class DominatingSet : public SolutionSpace {
 private:
     bool show_info_ = false;
     const tdzdd::Graph& graph_;
+    bool is_connected_;
 
 public:
     DominatingSet(const tdzdd::Graph& graph, int num_vertices,
+                  bool is_connected,
                   bool show_info)
         : SolutionSpace(num_vertices), graph_(graph),
+          is_connected_(is_connected),
           show_info_(show_info) { }
 
     virtual ZBDD createSolutionSpaceZdd()
@@ -70,6 +74,11 @@ public:
                 std::cerr << "Cannot construct the dominating set ZDD due to memory shortage." << std::endl;
                 exit(1);
             }
+        }
+
+        if (is_connected_) {
+            ConnectedInducedSubgraph cis(graph_, true, show_info_);
+            dominating_set_zdd &= cis.createSolutionSpaceZdd();
         }
 
         return dominating_set_zdd;
