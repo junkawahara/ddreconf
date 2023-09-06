@@ -30,19 +30,20 @@
 class Matching : public SolutionSpace {
 private:
     bool show_info_ = false;
+    const bool is_complete_ = false;
     const tdzdd::Graph& graph_;
 
 public:
-    Matching(const tdzdd::Graph& graph, bool show_info)
-        : SolutionSpace(graph.edgeSize()), graph_(graph),
+    Matching(const tdzdd::Graph& graph, bool is_complete, bool show_info)
+        : SolutionSpace(graph.edgeSize()), graph_(graph), is_complete_(is_complete),
           show_info_(show_info) { }
 
     virtual ZBDD createSolutionSpaceZdd()
     {
         const int m = graph_.edgeSize();
 
-        IntRange zero_or_one(0, 1);
-        DegreeConstraint dc(graph_, &zero_or_one);
+        IntRange range((is_complete_ ? 1 : 0), 1);
+        DegreeConstraint dc(graph_, &range);
 
         DdStructure<2> dd(dc);
         ZBDD z = dd.evaluate(ToZBDD());

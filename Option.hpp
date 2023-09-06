@@ -23,9 +23,9 @@
 #define OPTION_HPP
 
 enum SolKind {IND_SET, CLIQUE, VERTEX_COVER, DOMINATING_SET,
-              MATCHING, PATH,
-              TREE, SP_TREE, FOREST, R_SP_FOREST, ST_TREE, STEINER_SUB, STEINER_CYCLE};
-
+              MATCHING, CMATCHING, PATH,
+              TREE, SP_TREE, FOREST, R_SP_FOREST, ST_TREE,
+              STEINER_SUB, STEINER_CYCLE, CIS_E, CIS_V};
 struct Option {
 public:
     bool show_info = true;
@@ -53,6 +53,7 @@ public:
     bool isEdgeVariable() const
     {
         return sol_kind == MATCHING
+            || sol_kind == CMATCHING
             || sol_kind == TREE
             || sol_kind == SP_TREE
             || sol_kind == FOREST
@@ -123,6 +124,9 @@ public:
                 sol_kind = DOMINATING_SET;
             } else if (std::string(argv[i]) == std::string("--matching")) {
                 sol_kind = MATCHING;
+            } else if (std::string(argv[i]) == std::string("--cmatching")
+                       || std::string(argv[i]) == std::string("--completematching")) {
+                sol_kind = CMATCHING;
             } else if (std::string(argv[i]) == std::string("--path")) {
                 sol_kind = PATH;
             } else if (std::string(argv[i]) == std::string("--tree")) {

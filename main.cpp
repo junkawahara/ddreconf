@@ -104,6 +104,7 @@ int main(int argc, char** argv) {
         std::cout << "  --vc: vertex cover" << std::endl;
         std::cout << "  --ds: dominating set" << std::endl;
         std::cout << "  --matching: matching" << std::endl;
+        std::cout << "  --cmatching: complete matching" << std::endl;
         std::cout << "  --path: path" << std::endl;
         std::cout << "  --tree: tree" << std::endl;
         std::cout << "  --sptree: spanning tree" << std::endl;
@@ -203,7 +204,8 @@ int main(int argc, char** argv) {
         space = new DominatingSet(graph, num_vertices, option.show_info);
         break;
     case MATCHING:
-        space = new Matching(graph, option.show_info);
+    case CMATCHING:
+        space = new Matching(graph, (option.sol_kind == CMATCHING), option.show_info);
         break;
     case PATH:
         space = new Path(graph, option.show_info);
