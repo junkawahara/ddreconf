@@ -25,7 +25,6 @@
 #include "SolutionSpace.hpp"
 #include "tdzdd/util/IntSubset.hpp"
 //#include "tdzdd/spec/DegreeConstraint.hpp"
-#include "tdzdd/util/IntSubset.hpp"
 #include "tdzdd/eval/ToZBDD.hpp"
 
 #include "FrontierDegreeSpecified.hpp"
