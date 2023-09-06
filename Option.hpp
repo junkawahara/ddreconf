@@ -24,7 +24,7 @@
 
 enum SolKind {IND_SET, CLIQUE, VERTEX_COVER, DOMINATING_SET,
               MATCHING, PATH,
-              TREE, SP_TREE, FOREST, R_SP_FOREST, ST_TREE};
+              TREE, SP_TREE, FOREST, R_SP_FOREST, ST_TREE, STEINER_SUB, STEINER_CYCLE};
 
 struct Option {
 public:
@@ -57,7 +57,9 @@ public:
             || sol_kind == SP_TREE
             || sol_kind == FOREST
             || sol_kind == R_SP_FOREST
-            || sol_kind == ST_TREE;
+            || sol_kind == ST_TREE
+            || sol_kind == STEINER_SUB
+            || sol_kind == STEINER_CYCLE;
     }
 
     void parse(int argc, char** argv)
@@ -136,7 +138,12 @@ public:
             } else if (std::string(argv[i]) == std::string("--sttree")
                        || std::string(argv[i]) == std::string("--steinertree")) {
                 sol_kind = ST_TREE;
-
+            } else if (std::string(argv[i]) == std::string("--stsub")
+                       || std::string(argv[i]) == std::string("--steinersubgraph")) {
+                sol_kind = STEINER_SUB;
+            } else if (std::string(argv[i]) == std::string("--stcycle")
+                       || std::string(argv[i]) == std::string("--steinercycle")) {
+                sol_kind = STEINER_CYCLE;
             } else if (argv[i][0] == '-') {
                 std::cerr << "Unknown option: " << argv[i] << std::endl;
                 exit(1);

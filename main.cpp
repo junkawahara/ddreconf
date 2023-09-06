@@ -59,6 +59,7 @@ enum Model {TJ, TS, TAR};
 #include "Matching.hpp"
 #include "Path.hpp"
 #include "ForestOrTree.hpp"
+#include "SteinerSubgraph.hpp"
 
 #include "Reconf.hpp"
 
@@ -109,6 +110,8 @@ int main(int argc, char** argv) {
         std::cout << "  --forest: forest" << std::endl;
         std::cout << "  --rspforest: rooted spanning forest" << std::endl;
         std::cout << "  --sttree: Steiner tree" << std::endl;
+        std::cout << "  --stsub: Steiner subgraph" << std::endl;
+        std::cout << "  --stcycle: Steiner cycle" << std::endl;
         return 1;
     }
 #endif
@@ -232,14 +235,22 @@ int main(int argc, char** argv) {
                                  option.show_info);
         break;
     case ST_TREE:
+    case STEINER_SUB:
+    case STEINER_CYCLE:
         for (std::set<std::string>::iterator itor = root_set.begin();
              itor != root_set.end(); ++itor) {
             graph.setColor(*itor, 1);
         }
         graph.update();
-        space = new ForestOrTree(graph, true, false, false, true,
-                                 root_set, option.is_rainbow, colors,
-                                 option.show_info);
+        if (option.sol_kind == ST_TREE) {
+            space = new ForestOrTree(graph, true, false, false, true,
+                                     root_set, option.is_rainbow, colors,
+                                     option.show_info);
+        } else if (option.sol_kind == STEINER_SUB || option.sol_kind == STEINER_CYCLE) {
+            space = new SteinerSubgraph(graph, (option.sol_kind == STEINER_CYCLE),
+                                        option.show_info);
+        }
+        break;
         break;
     }
 
