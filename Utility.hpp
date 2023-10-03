@@ -142,6 +142,7 @@ int parse_DIMACS(std::istream& ist, Graph* graph,
             std::string st;
             bddvar bv;
             iss >> st; // skip first char
+            graph->update(); // need to update
             while (iss >> bv) {
                 if (is_edge_variable) {
                     vec->insert(bv);
