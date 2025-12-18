@@ -162,6 +162,7 @@ public:
         int step = reconfigure(start_set, std::set<bddvar>());
         std::set<bddvar> goal_set = pickRandomly(F_[step], random_);
         std::list<std::set<bddvar> > sequence;
+        F_.pop_back(); // remove the last because it is empty
         backtrack(start_set, goal_set, F_, &sequence);
         outputSequence(sequence, std::cout);
     }
