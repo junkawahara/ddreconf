@@ -87,6 +87,46 @@ int outerVertexToInner(const Graph& graph, int v)
     return graph.getVertex(ss.str());
 }
 
+// translate an outer vertex number into the corresponding ZDD variable
+int outerVertexToVar(const Graph& graph, int num_vertices, int v,
+                     VertexOrder vertex_order)
+{
+    switch (vertex_order) {
+    case VO_ASC:
+        return num_vertices + 1 - v;
+    case VO_DESC:
+        return v;
+    default: // VO_LEAVE
+        return outerVertexToInner(graph, v);
+    }
+}
+
+// translate an inner vertex number (in tdzdd::Graph)
+// into the corresponding ZDD variable
+int innerVertexToVar(const Graph& graph, int num_vertices, int v,
+                     VertexOrder vertex_order)
+{
+    if (vertex_order == VO_LEAVE) {
+        return v;
+    }
+    int outer = getVertexNumber(graph, v);
+    return (vertex_order == VO_ASC ? num_vertices + 1 - outer : outer);
+}
+
+// translate a ZDD variable into the corresponding outer vertex number
+int varToOuterVertex(const Graph& graph, int num_vertices, bddvar var,
+                     VertexOrder vertex_order)
+{
+    switch (vertex_order) {
+    case VO_ASC:
+        return num_vertices + 1 - static_cast<int>(var);
+    case VO_DESC:
+        return static_cast<int>(var);
+    default: // VO_LEAVE
+        return getVertexNumber(graph, var);
+    }
+}
+
 // graph: output graph
 // returned value: number of vertices
 int parse_DIMACS(std::istream& ist, Graph* graph,
@@ -94,7 +134,8 @@ int parse_DIMACS(std::istream& ist, Graph* graph,
                  std::set<bddvar>* goal_set,
                  std::set<std::string>* root_set,
                  std::vector<int>* colors,
-                 bool is_edge_variable)
+                 bool is_edge_variable,
+                 VertexOrder vertex_order)
 {
     int num_vertices = -1;
     int num_edges = -1;
@@ -147,7 +188,8 @@ int parse_DIMACS(std::istream& ist, Graph* graph,
                 if (is_edge_variable) {
                     vec->insert(bv);
                 } else {
-                    vec->insert(outerVertexToInner(*graph, bv));
+                    vec->insert(outerVertexToVar(*graph, num_vertices,
+                                                 bv, vertex_order));
                 }
             }
             if (s[0] == 's') {
@@ -192,7 +234,8 @@ int parse_DIMACS(std::istream& ist, Graph* graph,
 
 int parse_DIMACS(const char* filename, Graph* graph, std::set<bddvar>* start_set,
                  std::set<bddvar>* goal_set, std::set<std::string>* root_set,
-                 std::vector<int>* colors, bool is_edge_variable)
+                 std::vector<int>* colors, bool is_edge_variable,
+                 VertexOrder vertex_order)
 {
     std::ifstream ifs;
     ifs.open(filename);
@@ -200,11 +243,13 @@ int parse_DIMACS(const char* filename, Graph* graph, std::set<bddvar>* start_set
         std::cerr << "File " << filename << " cannot be opened." << std::endl;
         exit(1);
     }
-    return parse_DIMACS(ifs, graph, start_set, goal_set, root_set, colors, is_edge_variable);
+    return parse_DIMACS(ifs, graph, start_set, goal_set, root_set, colors,
+                        is_edge_variable, vertex_order);
 }
 
 void parse_stfile(const char* filename, Graph* graph, std::set<bddvar>* start_set,
-                  std::set<bddvar>* goal_set, bool is_edge_variable)
+                  std::set<bddvar>* goal_set, bool is_edge_variable,
+                  int num_vertices, VertexOrder vertex_order)
 {
     std::ifstream ifs;
     ifs.open(filename);
@@ -225,7 +270,8 @@ void parse_stfile(const char* filename, Graph* graph, std::set<bddvar>* start_se
                 if (is_edge_variable) {
                     vec->insert(bv);
                 } else {
-                    vec->insert(outerVertexToInner(*graph, bv));
+                    vec->insert(outerVertexToVar(*graph, num_vertices,
+                                                 bv, vertex_order));
                 }
             }
         }
@@ -240,7 +286,8 @@ std::set<bddvar> pickRandomly(const ZBDD& f, BigIntegerRandom& random)
 }
 
 void printSet(std::ostream& ost, const std::set<bddvar>& s,
-              const tdzdd::Graph& graph, bool is_edge_variable)
+              const tdzdd::Graph& graph, bool is_edge_variable,
+              int num_vertices, VertexOrder vertex_order)
 {
     std::set<bddvar>::iterator itor = s.begin();
     for ( ; itor != s.end(); ++itor) {
@@ -250,7 +297,7 @@ void printSet(std::ostream& ost, const std::set<bddvar>& s,
         if (is_edge_variable) {
             ost << *itor;
         } else {
-            ost << graph.vertexName(*itor);
+            ost << varToOuterVertex(graph, num_vertices, *itor, vertex_order);
         }
     }
     ost << std::endl;

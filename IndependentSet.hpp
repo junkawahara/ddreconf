@@ -35,14 +35,17 @@ private:
     // representing vertex covers instead of independent sets.
     const bool is_independent_set_;
     const bool is_connected_;
+    const VertexOrder vertex_order_;
 
 public:
     IndependentSet(const tdzdd::Graph& graph, int num_vertices,
                    bool is_independent_set,
-                   bool is_connected, bool show_info)
+                   bool is_connected, bool show_info,
+                   VertexOrder vertex_order = VO_LEAVE)
         : SolutionSpace(num_vertices), graph_(graph),
           is_independent_set_(is_independent_set),
-          is_connected_(is_connected), show_info_(show_info) { }
+          is_connected_(is_connected), show_info_(show_info),
+          vertex_order_(vertex_order) { }
 
     virtual ZBDD createSolutionSpaceZdd()
     {
@@ -60,9 +63,11 @@ public:
         for (int i = 0; i < m; ++i) {
             const Graph::EdgeInfo& edge = graph_.edgeInfo(i);
 
-            //int v1 = getVertexNumber(graph_, edge.v1);
-            //int v2 = getVertexNumber(graph_, edge.v2);
-            AdjacentSpec aspec(edge.v1, edge.v2, num_elements_, is_independent_set_);
+            int v1 = innerVertexToVar(graph_, num_elements_,
+                                      edge.v1, vertex_order_);
+            int v2 = innerVertexToVar(graph_, num_elements_,
+                                      edge.v2, vertex_order_);
+            AdjacentSpec aspec(v1, v2, num_elements_, is_independent_set_);
             DdStructure<2> dd(aspec);
             ZBDD zx = dd.evaluate(ToZBDD());
             independent_set_zdd &= zx;

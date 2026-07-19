@@ -29,10 +29,13 @@ class Clique : public SolutionSpace {
 private:
     bool show_info_ = false;
     const tdzdd::Graph& graph_;
+    const VertexOrder vertex_order_;
 
 public:
-    Clique(const tdzdd::Graph& graph, int num_vertices, bool show_info)
-        : SolutionSpace(num_vertices), graph_(graph), show_info_(show_info) { }
+    Clique(const tdzdd::Graph& graph, int num_vertices, bool show_info,
+           VertexOrder vertex_order = VO_LEAVE)
+        : SolutionSpace(num_vertices), graph_(graph), show_info_(show_info),
+          vertex_order_(vertex_order) { }
 
     virtual ZBDD createSolutionSpaceZdd()
     {
@@ -62,9 +65,11 @@ public:
                     }
                 }
                 if (!found) {
-                    // vv1 and vv2 are inner vertex numbers, which directly
-                    // correspond to ZDD variables (as in IndependentSet).
-                    AdjacentSpec aspec(vv1, vv2, num_elements_, true);
+                    int v1 = innerVertexToVar(graph_, num_elements_,
+                                              vv1, vertex_order_);
+                    int v2 = innerVertexToVar(graph_, num_elements_,
+                                              vv2, vertex_order_);
+                    AdjacentSpec aspec(v1, v2, num_elements_, true);
                     DdStructure<2> dd(aspec);
                     ZBDD zx = dd.evaluate(ToZBDD());
                     clique_zdd &= zx;

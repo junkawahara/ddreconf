@@ -48,17 +48,20 @@ private:
     bool show_info_verbose_;
     bool is_gc_;
     Graph graph_;
+    VertexOrder vertex_order_;
 
 public:
     Reconf(BigIntegerRandom& random, int num_elements,
            const Graph& graph,
-           bool is_edge_variable, bool show_info, bool is_gc)
+           bool is_edge_variable, bool show_info, bool is_gc,
+           VertexOrder vertex_order = VO_LEAVE)
         : num_elements_(num_elements),
           model_(TJ),
           random_(random),
           is_edge_variable_(is_edge_variable), is_zdd_store_(false),
           show_info_(show_info),
-          show_info_verbose_(false), is_gc_(is_gc), graph_(graph) {}
+          show_info_verbose_(false), is_gc_(is_gc), graph_(graph),
+          vertex_order_(vertex_order) {}
 
     void setNumElements(int num_elements)
     {
@@ -540,7 +543,8 @@ public:
                 if (is_edge_variable_) {
                     elems.push_back(num_elements_ + 1 - *it2);
                 } else {
-                    elems.push_back(getVertexNumber(graph_, *it2));
+                    elems.push_back(varToOuterVertex(graph_, num_elements_,
+                                                     *it2, vertex_order_));
                 }
             }
             std::sort(elems.begin(), elems.end());

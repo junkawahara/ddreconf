@@ -49,6 +49,13 @@ using namespace sbddh;
 
 enum Model {TJ, TS, TAR};
 
+// Order of ZDD variables for vertex-variable problems.
+// VO_LEAVE: order in which vertices leave the frontier (default,
+//           determined by tdzdd::Graph)
+// VO_ASC:   ascending order of DIMACS vertex numbers from the ZDD root
+// VO_DESC:  descending order of DIMACS vertex numbers from the ZDD root
+enum VertexOrder {VO_LEAVE, VO_ASC, VO_DESC};
+
 #include "RandomSample.hpp"
 #include "Utility.hpp"
 #include "Option.hpp"
@@ -90,6 +97,10 @@ int main(int argc, char** argv) {
         std::cout << "  --gc: force to run GC periodically"
                   << std::endl;
         std::cout << "  --rainbow: for rainbow spanning trees"
+                  << std::endl;
+        std::cout << "  --vorder=<order>: ZDD variable order of vertices; "
+                  << "<order> is leave (default), asc, or desc "
+                  << "(only for --indset, --clique, --vc and --ds)"
                   << std::endl;
         std::cout << "  --info: outputs info to stderr (default on)"
                   << std::endl;
@@ -145,11 +156,13 @@ int main(int argc, char** argv) {
 
 #ifdef STAND_ALONE
     num_vertices = parse_DIMACS(std::cin, &graph, &start_set, &goal_set,
-                                &root_set, &colors, option.isEdgeVariable());
+                                &root_set, &colors, option.isEdgeVariable(),
+                                option.vertex_order);
 #else
     num_vertices = parse_DIMACS(option.graph_filename.c_str(), &graph,
                                 &start_set, &goal_set, &root_set, &colors,
-                                option.isEdgeVariable());
+                                option.isEdgeVariable(),
+                                option.vertex_order);
 #endif
 
     if (option.isEdgeVariable()) {
@@ -172,7 +185,8 @@ int main(int argc, char** argv) {
         goal_set.clear();
         //goal_set.shrink_to_fit();
         parse_stfile(option.st_filename.c_str(), &graph,
-                     &start_set, &goal_set, option.isEdgeVariable());
+                     &start_set, &goal_set, option.isEdgeVariable(),
+                     num_vertices, option.vertex_order);
     }
 
     if (option.show_info) {
@@ -181,18 +195,21 @@ int main(int argc, char** argv) {
                   << ", # of edges = " << graph.edgeSize() << std::endl;
         if (!option.rand_start) {
             std::cerr << "s ";
-            printSet(std::cerr, start_set, graph, option.isEdgeVariable());
+            printSet(std::cerr, start_set, graph, option.isEdgeVariable(),
+                     num_vertices, option.vertex_order);
         }
         if (!option.longest_mode) {
             std::cerr << "t ";
-            printSet(std::cerr, goal_set, graph, option.isEdgeVariable());
+            printSet(std::cerr, goal_set, graph, option.isEdgeVariable(),
+                     num_vertices, option.vertex_order);
         }
     }
 
     if (option.st_mode && start_set == goal_set) {
         // Output for 0 step
         std::cout << "a ";
-        printSet(std::cout, start_set, graph, option.isEdgeVariable());
+        printSet(std::cout, start_set, graph, option.isEdgeVariable(),
+                 num_vertices, option.vertex_order);
         return 0;
     }
 
@@ -208,17 +225,21 @@ int main(int argc, char** argv) {
     ZBDD solution_space_zdd;
     switch (option.sol_kind) {
     case IND_SET:
-        space = new IndependentSet(graph, num_vertices, true, false, option.show_info);
+        space = new IndependentSet(graph, num_vertices, true, false, option.show_info,
+                                   option.vertex_order);
         break;
     case CLIQUE:
-        space = new Clique(graph, num_vertices, option.show_info);
+        space = new Clique(graph, num_vertices, option.show_info,
+                           option.vertex_order);
         break;
     case VERTEX_COVER:
         // use IndependentSet class with argument is_independent_set == false
-        space = new IndependentSet(graph, num_vertices, false, false, option.show_info);
+        space = new IndependentSet(graph, num_vertices, false, false, option.show_info,
+                                   option.vertex_order);
         break;
     case DOMINATING_SET:
-        space = new DominatingSet(graph, num_vertices, false, option.show_info);
+        space = new DominatingSet(graph, num_vertices, false, option.show_info,
+                                  option.vertex_order);
         break;
     case MATCHING:
     case CMATCHING:
@@ -347,10 +368,12 @@ int main(int argc, char** argv) {
                 std::set<bddvar> start_set_rev =
                     inverseSet(start_set,graph.edgeSize() + 1);
                 printSet(std::cerr, start_set_rev, graph,
-                         option.isEdgeVariable());
+                         option.isEdgeVariable(),
+                         num_vertices, option.vertex_order);
             } else {
                 printSet(std::cerr, start_set, graph,
-                         option.isEdgeVariable());
+                         option.isEdgeVariable(),
+                         num_vertices, option.vertex_order);
             }
         }
     }
@@ -359,7 +382,8 @@ int main(int argc, char** argv) {
 
     Reconf reconf(random, space->getNumElements(), graph,
                   option.isEdgeVariable(),
-                  option.show_info, option.is_gc);
+                  option.show_info, option.is_gc,
+                  option.vertex_order);
 
     if (option.zdd_dir) {
         reconf.setZddDir(option.zdd_dirname);

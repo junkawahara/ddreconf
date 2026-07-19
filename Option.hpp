@@ -49,6 +49,7 @@ public:
 
     enum SolKind sol_kind = IND_SET;
     enum Model model = TJ;
+    enum VertexOrder vertex_order = VO_LEAVE;
 
 public:
 
@@ -112,6 +113,21 @@ public:
             } else if (std::string(argv[i]).find(std::string("--tar=")) == 0) {
                 model = TAR;
                 tar_k = atoi(std::string(argv[i]).substr(6).c_str());
+            } else if (std::string(argv[i]).find(std::string("--vorder=")) == 0
+                       || std::string(argv[i]).find(std::string("--vertexorder=")) == 0) {
+                std::string value = std::string(argv[i]);
+                value = value.substr(value.find('=') + 1);
+                if (value == "leave") {
+                    vertex_order = VO_LEAVE;
+                } else if (value == "asc") {
+                    vertex_order = VO_ASC;
+                } else if (value == "desc") {
+                    vertex_order = VO_DESC;
+                } else {
+                    std::cerr << "Unknown vertex order: " << value
+                              << " (must be leave, asc, or desc)" << std::endl;
+                    exit(1);
+                }
             } else if (std::string(argv[i]) == std::string("--rainbow")) {
                 is_rainbow = true;
             } else if (std::string(argv[i]) == std::string("--indset")
@@ -176,6 +192,17 @@ public:
         }
         if (graph_filename.empty()) {
             std::cerr << "The input graph file must be specified." << std::endl;
+            exit(1);
+        }
+        if (vertex_order != VO_LEAVE
+            && sol_kind != IND_SET && sol_kind != CLIQUE
+            && sol_kind != VERTEX_COVER && sol_kind != DOMINATING_SET) {
+            // The frontier-based vertex-variable problems (e.g. --cisv,
+            // --cvc, --cds) assume that the variable order is the
+            // frontier-leaving order, and the vertex order is meaningless
+            // for the edge-variable problems.
+            std::cerr << "--vorder is supported only for --indset, "
+                      << "--clique, --vc, and --ds." << std::endl;
             exit(1);
         }
     }

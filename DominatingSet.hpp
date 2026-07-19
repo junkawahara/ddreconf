@@ -31,14 +31,17 @@ private:
     bool show_info_ = false;
     const tdzdd::Graph& graph_;
     bool is_connected_;
+    const VertexOrder vertex_order_;
 
 public:
     DominatingSet(const tdzdd::Graph& graph, int num_vertices,
                   bool is_connected,
-                  bool show_info)
+                  bool show_info,
+                  VertexOrder vertex_order = VO_LEAVE)
         : SolutionSpace(num_vertices), graph_(graph),
           is_connected_(is_connected),
-          show_info_(show_info) { }
+          show_info_(show_info),
+          vertex_order_(vertex_order) { }
 
     virtual ZBDD createSolutionSpaceZdd()
     {
@@ -54,15 +57,18 @@ public:
 
         for (int v = 1; v <= num_elements_; ++v) {
             std::set<int> s;
-            s.insert(v);
+            s.insert(innerVertexToVar(graph_, num_elements_,
+                                      v, vertex_order_));
 
             // insert all the neighbors of v into s
             for (int j = 0; j < m; ++j) {
                 const Graph::EdgeInfo& edge = graph_.edgeInfo(j);
                 if (edge.v1 == v) {
-                    s.insert(edge.v2);
+                    s.insert(innerVertexToVar(graph_, num_elements_,
+                                              edge.v2, vertex_order_));
                 } else if (edge.v2 == v) {
-                    s.insert(edge.v1);
+                    s.insert(innerVertexToVar(graph_, num_elements_,
+                                              edge.v1, vertex_order_));
                 }
             }
             VariableConditionSpec vcspec(s, num_elements_,
