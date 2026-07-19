@@ -62,9 +62,9 @@ public:
                     }
                 }
                 if (!found) {
-                    int v1 = getVertexNumber(graph_, vv1);
-                    int v2 = getVertexNumber(graph_, vv2);
-                    AdjacentSpec aspec(v1, v2, num_elements_, true);
+                    // vv1 and vv2 are inner vertex numbers, which directly
+                    // correspond to ZDD variables (as in IndependentSet).
+                    AdjacentSpec aspec(vv1, vv2, num_elements_, true);
                     DdStructure<2> dd(aspec);
                     ZBDD zx = dd.evaluate(ToZBDD());
                     clique_zdd &= zx;
