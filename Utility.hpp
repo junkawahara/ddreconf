@@ -87,55 +87,175 @@ int outerVertexToInner(const Graph& graph, int v)
     return graph.getVertex(ss.str());
 }
 
-// translate an outer vertex number into the corresponding ZDD variable
-int outerVertexToVar(const Graph& graph, int num_vertices, int v,
-                     VertexOrder vertex_order)
-{
-    switch (vertex_order) {
-    case VO_ASC:
-        return num_vertices + 1 - v;
-    case VO_DESC:
-        return v;
-    default: // VO_LEAVE
-        return outerVertexToInner(graph, v);
-    }
-}
+// Manages the mapping between outer vertex numbers (in the DIMACS file)
+// and ZDD variables for vertex-variable problems.
+class VertexMapping {
+private:
+    std::vector<int> vertex_to_var_; // outer vertex number -> ZDD variable
+    std::vector<int> var_to_vertex_; // ZDD variable -> outer vertex number
 
-// translate an inner vertex number (in tdzdd::Graph)
-// into the corresponding ZDD variable
-int innerVertexToVar(const Graph& graph, int num_vertices, int v,
-                     VertexOrder vertex_order)
-{
-    if (vertex_order == VO_LEAVE) {
-        return v;
-    }
-    int outer = getVertexNumber(graph, v);
-    return (vertex_order == VO_ASC ? num_vertices + 1 - outer : outer);
-}
+public:
+    // graph must have been updated
+    void initialize(const Graph& graph, int num_vertices,
+                    VertexOrder vertex_order,
+                    const std::string& order_filename)
+    {
+        vertex_to_var_.assign(num_vertices + 1, 0);
+        var_to_vertex_.assign(num_vertices + 1, 0);
 
-// translate a ZDD variable into the corresponding outer vertex number
-int varToOuterVertex(const Graph& graph, int num_vertices, bddvar var,
-                     VertexOrder vertex_order)
-{
-    switch (vertex_order) {
-    case VO_ASC:
-        return num_vertices + 1 - static_cast<int>(var);
-    case VO_DESC:
-        return static_cast<int>(var);
-    default: // VO_LEAVE
-        return getVertexNumber(graph, var);
+        switch (vertex_order) {
+        case VO_ASC:
+            // vertex 1 is nearest to the ZDD root (variable num_vertices)
+            for (int v = 1; v <= num_vertices; ++v) {
+                vertex_to_var_[v] = num_vertices + 1 - v;
+            }
+            break;
+        case VO_DESC:
+            for (int v = 1; v <= num_vertices; ++v) {
+                vertex_to_var_[v] = v;
+            }
+            break;
+        case VO_FILE:
+            readOrderFile(order_filename, num_vertices);
+            break;
+        default: // VO_LEAVE
+            // The ZDD variable of a vertex is its inner vertex number.
+            // Vertices not appearing in any edge have no inner vertex
+            // number and are assigned to the remaining variables in
+            // ascending order.
+            for (int v = 1; v <= graph.vertexSize(); ++v) {
+                vertex_to_var_[getVertexNumber(graph, v)] = v;
+            }
+            {
+                int var = graph.vertexSize();
+                for (int v = 1; v <= num_vertices; ++v) {
+                    if (vertex_to_var_[v] == 0) {
+                        vertex_to_var_[v] = ++var;
+                    }
+                }
+            }
+            break;
+        }
+        for (int v = 1; v <= num_vertices; ++v) {
+            var_to_vertex_[vertex_to_var_[v]] = v;
+        }
     }
-}
+
+    // translate an outer vertex number into the corresponding ZDD variable
+    int outerToVar(int v) const
+    {
+        if (!(1 <= v && v < static_cast<int>(vertex_to_var_.size()))) {
+            std::cerr << "Vertex number " << v << " is out of range."
+                      << std::endl;
+            exit(1);
+        }
+        return vertex_to_var_[v];
+    }
+
+    // translate a ZDD variable into the corresponding outer vertex number
+    int varToOuter(bddvar var) const
+    {
+        if (!(1 <= var && var < var_to_vertex_.size())) {
+            std::cerr << "ZDD variable " << var << " is out of range."
+                      << std::endl;
+            exit(1);
+        }
+        return var_to_vertex_[var];
+    }
+
+    // translate an inner vertex number (in tdzdd::Graph)
+    // into the corresponding ZDD variable
+    int innerToVar(const Graph& graph, int v) const
+    {
+        return outerToVar(getVertexNumber(graph, v));
+    }
+
+    std::set<bddvar> outerSetToVarSet(const std::set<bddvar>& s) const
+    {
+        std::set<bddvar> ns;
+        for (std::set<bddvar>::const_iterator itor = s.begin();
+             itor != s.end(); ++itor) {
+            ns.insert(outerToVar(*itor));
+        }
+        return ns;
+    }
+
+    // Write the vertex order to a file in the same format as the
+    // --vorderfile option (from the ZDD root side).
+    void writeOrderFile(const std::string& filename) const
+    {
+        std::ofstream ofs(filename.c_str());
+        if (!ofs) {
+            std::cerr << "File " << filename << " cannot be opened."
+                      << std::endl;
+            exit(1);
+        }
+        int n = static_cast<int>(var_to_vertex_.size()) - 1;
+        for (int var = n; var >= 1; --var) {
+            if (var != n) {
+                ofs << " ";
+            }
+            ofs << var_to_vertex_[var];
+        }
+        ofs << std::endl;
+    }
+
+private:
+    void readOrderFile(const std::string& filename, int num_vertices)
+    {
+        std::ifstream ifs(filename.c_str());
+        if (!ifs) {
+            std::cerr << "File " << filename << " cannot be opened."
+                      << std::endl;
+            exit(1);
+        }
+        std::vector<int> order;
+        std::string line;
+        while (ifs && std::getline(ifs, line)) {
+            if (line.empty() || line[0] == 'c') { // skip comment line
+                continue;
+            }
+            std::istringstream iss(line);
+            int v;
+            while (iss >> v) {
+                order.push_back(v);
+            }
+        }
+        if (static_cast<int>(order.size()) != num_vertices) {
+            std::cerr << "The vertex order file must contain "
+                      << num_vertices << " vertex numbers, but contains "
+                      << order.size() << " numbers." << std::endl;
+            exit(1);
+        }
+        for (size_t k = 0; k < order.size(); ++k) {
+            int v = order[k];
+            if (!(1 <= v && v <= num_vertices)) {
+                std::cerr << "Vertex number " << v
+                          << " in the vertex order file is out of range."
+                          << std::endl;
+                exit(1);
+            }
+            if (vertex_to_var_[v] != 0) {
+                std::cerr << "Vertex number " << v << " appears twice "
+                          << "in the vertex order file." << std::endl;
+                exit(1);
+            }
+            // the first listed vertex is nearest to the ZDD root
+            vertex_to_var_[v] = num_vertices - static_cast<int>(k);
+        }
+    }
+};
 
 // graph: output graph
 // returned value: number of vertices
+// The numbers in the s/t lines are stored in start_set/goal_set as is.
+// The caller must translate them into ZDD variables
+// (by VertexMapping::outerSetToVarSet or inverseSet).
 int parse_DIMACS(std::istream& ist, Graph* graph,
                  std::set<bddvar>* start_set,
                  std::set<bddvar>* goal_set,
                  std::set<std::string>* root_set,
-                 std::vector<int>* colors,
-                 bool is_edge_variable,
-                 VertexOrder vertex_order)
+                 std::vector<int>* colors)
 {
     int num_vertices = -1;
     int num_edges = -1;
@@ -183,14 +303,8 @@ int parse_DIMACS(std::istream& ist, Graph* graph,
             std::string st;
             bddvar bv;
             iss >> st; // skip first char
-            graph->update(); // need to update
             while (iss >> bv) {
-                if (is_edge_variable) {
-                    vec->insert(bv);
-                } else {
-                    vec->insert(outerVertexToVar(*graph, num_vertices,
-                                                 bv, vertex_order));
-                }
+                vec->insert(bv);
             }
             if (s[0] == 's') {
                 read_s = true;
@@ -234,8 +348,7 @@ int parse_DIMACS(std::istream& ist, Graph* graph,
 
 int parse_DIMACS(const char* filename, Graph* graph, std::set<bddvar>* start_set,
                  std::set<bddvar>* goal_set, std::set<std::string>* root_set,
-                 std::vector<int>* colors, bool is_edge_variable,
-                 VertexOrder vertex_order)
+                 std::vector<int>* colors)
 {
     std::ifstream ifs;
     ifs.open(filename);
@@ -243,13 +356,12 @@ int parse_DIMACS(const char* filename, Graph* graph, std::set<bddvar>* start_set
         std::cerr << "File " << filename << " cannot be opened." << std::endl;
         exit(1);
     }
-    return parse_DIMACS(ifs, graph, start_set, goal_set, root_set, colors,
-                        is_edge_variable, vertex_order);
+    return parse_DIMACS(ifs, graph, start_set, goal_set, root_set, colors);
 }
 
-void parse_stfile(const char* filename, Graph* graph, std::set<bddvar>* start_set,
-                  std::set<bddvar>* goal_set, bool is_edge_variable,
-                  int num_vertices, VertexOrder vertex_order)
+// The numbers in the s/t lines are stored as is (see parse_DIMACS).
+void parse_stfile(const char* filename, std::set<bddvar>* start_set,
+                  std::set<bddvar>* goal_set)
 {
     std::ifstream ifs;
     ifs.open(filename);
@@ -267,12 +379,7 @@ void parse_stfile(const char* filename, Graph* graph, std::set<bddvar>* start_se
             bddvar bv;
             iss >> st; // skip first char
             while (iss >> bv) {
-                if (is_edge_variable) {
-                    vec->insert(bv);
-                } else {
-                    vec->insert(outerVertexToVar(*graph, num_vertices,
-                                                 bv, vertex_order));
-                }
+                vec->insert(bv);
             }
         }
     }
@@ -286,8 +393,7 @@ std::set<bddvar> pickRandomly(const ZBDD& f, BigIntegerRandom& random)
 }
 
 void printSet(std::ostream& ost, const std::set<bddvar>& s,
-              const tdzdd::Graph& graph, bool is_edge_variable,
-              int num_vertices, VertexOrder vertex_order)
+              const VertexMapping& vertex_mapping, bool is_edge_variable)
 {
     std::set<bddvar>::iterator itor = s.begin();
     for ( ; itor != s.end(); ++itor) {
@@ -297,7 +403,7 @@ void printSet(std::ostream& ost, const std::set<bddvar>& s,
         if (is_edge_variable) {
             ost << *itor;
         } else {
-            ost << varToOuterVertex(graph, num_vertices, *itor, vertex_order);
+            ost << vertex_mapping.varToOuter(*itor);
         }
     }
     ost << std::endl;

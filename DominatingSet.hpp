@@ -31,17 +31,17 @@ private:
     bool show_info_ = false;
     const tdzdd::Graph& graph_;
     bool is_connected_;
-    const VertexOrder vertex_order_;
+    const VertexMapping& vertex_mapping_;
 
 public:
     DominatingSet(const tdzdd::Graph& graph, int num_vertices,
                   bool is_connected,
                   bool show_info,
-                  VertexOrder vertex_order = VO_LEAVE)
+                  const VertexMapping& vertex_mapping)
         : SolutionSpace(num_vertices), graph_(graph),
           is_connected_(is_connected),
           show_info_(show_info),
-          vertex_order_(vertex_order) { }
+          vertex_mapping_(vertex_mapping) { }
 
     virtual ZBDD createSolutionSpaceZdd()
     {
@@ -57,18 +57,15 @@ public:
 
         for (int v = 1; v <= num_elements_; ++v) {
             std::set<int> s;
-            s.insert(innerVertexToVar(graph_, num_elements_,
-                                      v, vertex_order_));
+            s.insert(vertex_mapping_.innerToVar(graph_, v));
 
             // insert all the neighbors of v into s
             for (int j = 0; j < m; ++j) {
                 const Graph::EdgeInfo& edge = graph_.edgeInfo(j);
                 if (edge.v1 == v) {
-                    s.insert(innerVertexToVar(graph_, num_elements_,
-                                              edge.v2, vertex_order_));
+                    s.insert(vertex_mapping_.innerToVar(graph_, edge.v2));
                 } else if (edge.v2 == v) {
-                    s.insert(innerVertexToVar(graph_, num_elements_,
-                                              edge.v1, vertex_order_));
+                    s.insert(vertex_mapping_.innerToVar(graph_, edge.v1));
                 }
             }
             VariableConditionSpec vcspec(s, num_elements_,

@@ -42,10 +42,13 @@ public:
     bool longest_mode = false;
     bool is_gc = false;
     bool is_rainbow = false;
+    bool vorder_out = false;
     int tar_k = 0;
     std::string graph_filename;
     std::string st_filename;
     std::string zdd_dirname;
+    std::string vorder_filename;
+    std::string vorder_out_filename;
 
     enum SolKind sol_kind = IND_SET;
     enum Model model = TJ;
@@ -113,6 +116,12 @@ public:
             } else if (std::string(argv[i]).find(std::string("--tar=")) == 0) {
                 model = TAR;
                 tar_k = atoi(std::string(argv[i]).substr(6).c_str());
+            } else if (std::string(argv[i]).find(std::string("--vorderfile=")) == 0) {
+                vertex_order = VO_FILE;
+                vorder_filename = std::string(argv[i]).substr(13);
+            } else if (std::string(argv[i]).find(std::string("--vorderout=")) == 0) {
+                vorder_out = true;
+                vorder_out_filename = std::string(argv[i]).substr(12);
             } else if (std::string(argv[i]).find(std::string("--vorder=")) == 0
                        || std::string(argv[i]).find(std::string("--vertexorder=")) == 0) {
                 std::string value = std::string(argv[i]);
@@ -194,15 +203,16 @@ public:
             std::cerr << "The input graph file must be specified." << std::endl;
             exit(1);
         }
-        if (vertex_order != VO_LEAVE
+        if ((vertex_order != VO_LEAVE || vorder_out)
             && sol_kind != IND_SET && sol_kind != CLIQUE
             && sol_kind != VERTEX_COVER && sol_kind != DOMINATING_SET) {
             // The frontier-based vertex-variable problems (e.g. --cisv,
             // --cvc, --cds) assume that the variable order is the
             // frontier-leaving order, and the vertex order is meaningless
             // for the edge-variable problems.
-            std::cerr << "--vorder is supported only for --indset, "
-                      << "--clique, --vc, and --ds." << std::endl;
+            std::cerr << "--vorder, --vorderfile, and --vorderout are "
+                      << "supported only for --indset, --clique, --vc, "
+                      << "and --ds." << std::endl;
             exit(1);
         }
     }

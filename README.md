@@ -33,6 +33,8 @@ To run the program,
 * `--longest` Finds the longest reconfiguration sequence from s (t is ignored).
 * `--rainbow` Option for rainbow-spanning tree.
 * `--vorder=<order>` Specifies the ZDD variable order of vertices. `<order>` is one of `leave` (default; the order in which vertices leave the frontier), `asc` (ascending order of vertex numbers from the ZDD root), and `desc` (descending order). Supported only for `--indset`, `--clique`, `--vc`, and `--ds`.
+* `--vorderfile=<file>` Specifies the ZDD variable order of vertices by a file. The file contains a permutation of the vertex numbers 1, ..., n, separated by whitespace or newlines, listed from the ZDD root side (that is, the first listed vertex is decided first). Lines beginning with `c` are ignored as comments. Supported only for `--indset`, `--clique`, `--vc`, and `--ds`.
+* `--vorderout=<file>` Writes the vertex order actually used to `<file>` in the same format as `--vorderfile`. This is useful for obtaining the default (`leave`) order as a starting point for experiments. Supported only for `--indset`, `--clique`, `--vc`, and `--ds`.
 * `--info` Outputs detailed information about the program execution. On by default.
 * `-q` `--quiet` Does not output detailed information about the program execution.
 
