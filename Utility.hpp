@@ -22,6 +22,8 @@
 #ifndef UTILITY_HPP
 #define UTILITY_HPP
 
+#include <algorithm>
+
 inline double getTime()
 {
     struct timeval tv;
@@ -449,16 +451,23 @@ std::set<bddvar> pickRandomly(const ZBDD& f, BigIntegerRandom& random)
 void printSet(std::ostream& ost, const std::set<bddvar>& s,
               const VertexMapping& vertex_mapping, bool is_edge_variable)
 {
+    // The elements are sorted by the vertex/edge number of the input file,
+    // which is not the order of the ZDD variables.
+    std::vector<int> elems;
     std::set<bddvar>::iterator itor = s.begin();
     for ( ; itor != s.end(); ++itor) {
-        if (itor != s.begin()) {
+        if (is_edge_variable) {
+            elems.push_back(static_cast<int>(*itor));
+        } else {
+            elems.push_back(vertex_mapping.varToOuter(*itor));
+        }
+    }
+    std::sort(elems.begin(), elems.end());
+    for (size_t i = 0; i < elems.size(); ++i) {
+        if (i != 0) {
             ost << " ";
         }
-        if (is_edge_variable) {
-            ost << *itor;
-        } else {
-            ost << vertex_mapping.varToOuter(*itor);
-        }
+        ost << elems[i];
     }
     ost << std::endl;
 }
