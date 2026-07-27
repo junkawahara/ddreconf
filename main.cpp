@@ -87,6 +87,8 @@ int main(int argc, char** argv) {
         std::cout << "[option]" << std::endl;
         std::cout << "  --randstart: randomly generates"
                   << " a start set" << std::endl;
+        std::cout << "  --randmax: generates the start set with the maximum "
+                  << "number of elements (with --randstart)" << std::endl;
         std::cout << "  --st: computes the reconf sequence from s to t"
                   << std::endl;
         std::cout << "  --stb: computes the reconf sequence from s to t in the bidirection"
@@ -99,6 +101,9 @@ int main(int argc, char** argv) {
                   << std::endl;
         std::cout << "  --enum: enumerates all the elements of the "
                   << "solution space" << std::endl;
+        std::cout << "  --zdddir=<dir>: saves the intermediate ZDDs of "
+                  << "an --st search into files whose names start with "
+                  << "<dir>" << std::endl;
         std::cout << "  --gc: force to run GC periodically"
                   << std::endl;
         std::cout << "  --rainbow: for rainbow spanning trees"
@@ -129,7 +134,9 @@ int main(int argc, char** argv) {
         std::cout << "  --indset: independent set (default)" << std::endl;
         std::cout << "  --clique: clique" << std::endl;
         std::cout << "  --vc: vertex cover" << std::endl;
+        std::cout << "  --cvc: connected vertex cover" << std::endl;
         std::cout << "  --ds: dominating set" << std::endl;
+        std::cout << "  --cds: connected dominating set" << std::endl;
         std::cout << "  --matching: matching" << std::endl;
         std::cout << "  --cmatching: complete matching" << std::endl;
         std::cout << "  --path: path" << std::endl;
@@ -140,6 +147,10 @@ int main(int argc, char** argv) {
         std::cout << "  --sttree: Steiner tree" << std::endl;
         std::cout << "  --stsub: Steiner subgraph" << std::endl;
         std::cout << "  --stcycle: Steiner cycle" << std::endl;
+        std::cout << "  --cise: connected induced subgraph "
+                  << "(as an edge set)" << std::endl;
+        std::cout << "  --cisv: connected induced subgraph "
+                  << "(as a vertex set)" << std::endl;
         return 1;
     }
 #endif
