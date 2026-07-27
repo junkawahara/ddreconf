@@ -27,10 +27,16 @@
 #endif /* BDD_CPP */
 
 extern bddp   remove_element B_ARG((bddp f));
-extern bddp   remove_specified_element B_ARG((bddp f, int* elements));
 extern bddp   add_element B_ARG((bddp f, int n));
-extern bddp   add_specified_element B_ARG((bddp f, int* elements));
 extern bddp   swap_element B_ARG((bddp f, int n));
+
+/* The following functions have no caller yet (they are intended for the
+   token sliding model). Their operation caches are commented out in
+   bddc_reconf.c, so they do not share the results of the recursive calls
+   and take exponential time in the ZDD size. Enable the caches before
+   using them. */
+extern bddp   remove_specified_element B_ARG((bddp f, int* elements));
+extern bddp   add_specified_element B_ARG((bddp f, int* elements));
 extern bddp   swap_specified_element B_ARG((bddp f, int* elements));
 extern bddp   swap_adjacent_element B_ARG((bddp f, int* elements, int** adjacent));
 
