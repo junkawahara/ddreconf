@@ -43,7 +43,15 @@ public:
     }
 
     int getChild(int& state, int level, int value) const {
-        if (level == v1_) {
+        if (v1_ == v2_) { // self loop
+            if (level == v1_) {
+                // cond_ is true  -> v1_ must not be contained
+                // cond_ is false -> v1_ must be contained
+                if (value == (cond_ ? 1 : 0)) {
+                    return 0;
+                }
+            }
+        } else if (level == v1_) {
             state = value;
         } else if (level == v2_) {
             if (cond_) {
