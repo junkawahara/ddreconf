@@ -97,6 +97,8 @@ int main(int argc, char** argv) {
                   << " in file <file_name>" << std::endl;
         std::cout << "  --longest: computes the longest reconf seq"
                   << std::endl;
+        std::cout << "  --enum: enumerates all the elements of the "
+                  << "solution space" << std::endl;
         std::cout << "  --gc: force to run GC periodically"
                   << std::endl;
         std::cout << "  --rainbow: for rainbow spanning trees"
@@ -371,13 +373,22 @@ int main(int argc, char** argv) {
     }
 
     if (option.is_enum) {
-        int num_elements = (option.isEdgeVariable()
-                                ? graph.edgeSize() : num_vertices);
-        sbddh::printZBDDElementsAsValueList(std::cout,
-                                            solution_space_zdd,
-                                            "\n", " ",
-                                            num_elements);
-        std::cout << std::endl;
+        // Print each element of the solution space as the list of the
+        // vertex/edge numbers of the input file, that is, in the same
+        // format as the s and t lines.
+        sbddh::ElementIteratorHolder eih(solution_space_zdd);
+        for (sbddh::ElementIterator itor = eih.begin();
+             itor != eih.end(); ++itor) {
+            std::set<bddvar> s = *itor;
+            std::set<bddvar> elems;
+            if (option.isEdgeVariable()) {
+                elems = inverseSet(s, graph.edgeSize() + 1);
+            } else {
+                elems = s;
+            }
+            printSet(std::cout, elems, vertex_mapping,
+                     option.isEdgeVariable());
+        }
     }
 
     if (!(option.st_mode || option.longest_mode)) {
