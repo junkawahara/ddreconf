@@ -332,11 +332,21 @@ int parse_DIMACS(std::istream& ist, Graph* graph,
                 vec->insert(bv);
             }
         } else if (s[0] == 'r') {
+            if (num_vertices < 0) {
+                std::cerr << "'r' line must appear after 'p' line"
+                          << std::endl;
+                exit(1);
+            }
             std::istringstream iss(s);
             std::string dummy;
             std::string root;
             iss >> dummy; // skip first char
             while (iss >> root) {
+                if (!checkVertexFormat(root, num_vertices)) {
+                    std::cerr << "illegal input format in line "
+                              << line_number << std::endl;
+                    exit(1);
+                }
                 root_set->insert(root);
             }
         } else if (s[0] == 'y') {
