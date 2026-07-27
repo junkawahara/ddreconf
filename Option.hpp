@@ -71,6 +71,16 @@ public:
             || sol_kind == CIS_E;
     }
 
+    // The solution space of these problems is filtered by (or is) the
+    // connected induced subgraph ZDD, whose vertex variable order is
+    // determined by ConvEVDD.
+    bool usesConnectivityFilter() const
+    {
+        return sol_kind == CIS_V
+            || sol_kind == CONNECTED_VERTEX_COVER
+            || sol_kind == CONNECTED_DOMINATING_SET;
+    }
+
     void parse(int argc, char** argv)
     {
         for (int i = 1; i < argc; ++i) {

@@ -118,6 +118,33 @@ public:
         case VO_FILE:
             readOrderFile(order_filename, num_vertices);
             break;
+        case VO_CIS:
+            // ConvEVDD, which translates the edge-variable connected
+            // induced subgraph ZDD into a vertex-variable one, assigns the
+            // ZDD variables in the order in which the vertices leave the
+            // frontier: the vertex leaving first gets the largest variable
+            // (that is, it is nearest to the ZDD root).
+            {
+                int var = graph.vertexSize();
+                for (int i = 0; i < graph.edgeSize(); ++i) {
+                    const Graph::EdgeInfo& e = graph.edgeInfo(i);
+                    if (e.v1final) {
+                        vertex_to_var_[getVertexNumber(graph, e.v1)] = var--;
+                    }
+                    if (e.v2final) {
+                        vertex_to_var_[getVertexNumber(graph, e.v2)] = var--;
+                    }
+                }
+                // Vertices appearing in no edge are not in tdzdd::Graph
+                // and are assigned to the remaining variables.
+                int rest = graph.vertexSize();
+                for (int v = 1; v <= num_vertices; ++v) {
+                    if (vertex_to_var_[v] == 0) {
+                        vertex_to_var_[v] = ++rest;
+                    }
+                }
+            }
+            break;
         default: // VO_LEAVE
             // The ZDD variable of a vertex is its inner vertex number.
             // Vertices not appearing in any edge have no inner vertex

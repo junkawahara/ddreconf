@@ -55,7 +55,9 @@ enum Model {TJ, TS, TAR};
 // VO_ASC:   ascending order of DIMACS vertex numbers from the ZDD root
 // VO_DESC:  descending order of DIMACS vertex numbers from the ZDD root
 // VO_FILE:  order given by a file (see the --vorderfile option)
-enum VertexOrder {VO_LEAVE, VO_ASC, VO_DESC, VO_FILE};
+// VO_CIS:   order that the connected induced subgraph ZDD is built in
+//           (not selectable by the user; see VertexMapping::initialize)
+enum VertexOrder {VO_LEAVE, VO_ASC, VO_DESC, VO_FILE, VO_CIS};
 
 #include "RandomSample.hpp"
 #include "Utility.hpp"
@@ -195,7 +197,11 @@ int main(int argc, char** argv) {
 
     VertexMapping vertex_mapping;
     if (!option.isEdgeVariable()) {
-        vertex_mapping.initialize(graph, num_vertices, option.vertex_order,
+        // The connectivity filter builds its own vertex variable order,
+        // which the rest of the program must follow.
+        VertexOrder vertex_order = (option.usesConnectivityFilter()
+                                    ? VO_CIS : option.vertex_order);
+        vertex_mapping.initialize(graph, num_vertices, vertex_order,
                                   option.vorder_filename);
         if (option.vorder_out) {
             vertex_mapping.writeOrderFile(option.vorder_out_filename);
