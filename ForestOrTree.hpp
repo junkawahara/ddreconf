@@ -34,6 +34,7 @@ class ForestOrTree : public SolutionSpace {
 private:
     bool show_info_ = false;
     const tdzdd::Graph& graph_;
+    const int num_vertices_;
 
     bool is_tree_;
     bool is_spanning_;
@@ -44,7 +45,7 @@ private:
     std::vector<int> colors_;
 
 public:
-    ForestOrTree(const tdzdd::Graph& graph, bool is_tree,
+    ForestOrTree(const tdzdd::Graph& graph, int num_vertices, bool is_tree,
                  bool is_spanning,
                  bool is_root, bool is_steiner,
                  std::set<std::string> root_set,
@@ -52,6 +53,7 @@ public:
                  bool is_rainbow, const std::vector<int>& colors,
                  bool show_info)
         : SolutionSpace(graph.edgeSize()), graph_(graph),
+          num_vertices_(num_vertices),
           is_tree_(is_tree),
           is_spanning_(is_spanning),
           is_root_(is_root), is_steiner_(is_steiner),
@@ -59,9 +61,45 @@ public:
           is_rainbow_(is_rainbow), colors_(colors),
           show_info_(show_info) { }
 
+    // A vertex appearing in no edge is not in tdzdd::Graph and cannot be
+    // covered by any edge, so no spanning subgraph exists. Such a vertex
+    // is allowed only as a root of a rooted spanning forest, where it
+    // forms a component by itself.
+    bool hasUncoverableVertex() const
+    {
+        if (graph_.vertexSize() >= num_vertices_) {
+            return false;
+        }
+        std::set<std::string> present;
+        for (int v = 1; v <= graph_.vertexSize(); ++v) {
+            present.insert(graph_.vertexName(v));
+        }
+        for (int v = 1; v <= num_vertices_; ++v) {
+            std::ostringstream oss;
+            oss << v;
+            std::string vs = oss.str();
+            if (present.count(vs) == 0
+                && (!is_root_ || root_set_.count(vs) == 0)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     virtual ZBDD createSolutionSpaceZdd()
     {
         const int m = graph_.edgeSize();
+
+        if (is_spanning_ && hasUncoverableVertex()) {
+            if (show_info_) {
+                std::cerr << "The graph has a vertex incident to no edge; "
+                          << "the solution space is empty." << std::endl;
+            }
+            while (BDD_VarUsed() < m) {
+                BDD_NewVar();
+            }
+            return ZBDD(0);
+        }
 
         DdStructure<2> dd;
 

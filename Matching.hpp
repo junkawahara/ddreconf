@@ -32,15 +32,31 @@ private:
     bool show_info_ = false;
     const bool is_complete_ = false;
     const tdzdd::Graph& graph_;
+    const int num_vertices_;
 
 public:
-    Matching(const tdzdd::Graph& graph, bool is_complete, bool show_info)
-        : SolutionSpace(graph.edgeSize()), graph_(graph), is_complete_(is_complete),
+    Matching(const tdzdd::Graph& graph, int num_vertices, bool is_complete,
+             bool show_info)
+        : SolutionSpace(graph.edgeSize()), graph_(graph),
+          num_vertices_(num_vertices), is_complete_(is_complete),
           show_info_(show_info) { }
 
     virtual ZBDD createSolutionSpaceZdd()
     {
         const int m = graph_.edgeSize();
+
+        // A vertex appearing in no edge is not in tdzdd::Graph and cannot
+        // be matched, so no complete matching exists.
+        if (is_complete_ && graph_.vertexSize() < num_vertices_) {
+            if (show_info_) {
+                std::cerr << "The graph has a vertex incident to no edge; "
+                          << "the solution space is empty." << std::endl;
+            }
+            while (BDD_VarUsed() < m) {
+                BDD_NewVar();
+            }
+            return ZBDD(0);
+        }
 
         IntRange range((is_complete_ ? 1 : 0), 1);
         DegreeConstraint dc(graph_, &range);

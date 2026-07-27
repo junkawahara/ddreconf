@@ -257,23 +257,25 @@ int main(int argc, char** argv) {
         break;
     case MATCHING:
     case CMATCHING:
-        space = new Matching(graph, (option.sol_kind == CMATCHING), option.show_info);
+        space = new Matching(graph, num_vertices,
+                             (option.sol_kind == CMATCHING),
+                             option.show_info);
         break;
     case PATH:
         space = new Path(graph, option.show_info);
         break;
     case FOREST:
-        space = new ForestOrTree(graph, false, false, false, false,
+        space = new ForestOrTree(graph, num_vertices, false, false, false, false,
                                  root_set, option.is_rainbow, colors,
                                  option.show_info);
         break;
     case TREE:
-        space = new ForestOrTree(graph, true, false, false, false,
+        space = new ForestOrTree(graph, num_vertices, true, false, false, false,
                                  root_set, option.is_rainbow, colors,
                                  option.show_info);
         break;
     case SP_TREE:
-        space = new ForestOrTree(graph, true, true, false, false,
+        space = new ForestOrTree(graph, num_vertices, true, true, false, false,
                                  root_set, option.is_rainbow, colors,
                                  option.show_info);
         break;
@@ -284,7 +286,7 @@ int main(int argc, char** argv) {
             ++col;
         }
         graph.update();
-        space = new ForestOrTree(graph, false, true, true, false,
+        space = new ForestOrTree(graph, num_vertices, false, true, true, false,
                                  root_set, option.is_rainbow, colors,
                                  option.show_info);
         break;
@@ -297,7 +299,7 @@ int main(int argc, char** argv) {
         }
         graph.update();
         if (option.sol_kind == ST_TREE) {
-            space = new ForestOrTree(graph, true, false, false, true,
+            space = new ForestOrTree(graph, num_vertices, true, false, false, true,
                                      root_set, option.is_rainbow, colors,
                                      option.show_info);
         } else if (option.sol_kind == STEINER_SUB || option.sol_kind == STEINER_CYCLE) {
