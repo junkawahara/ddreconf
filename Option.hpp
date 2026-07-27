@@ -218,6 +218,11 @@ public:
             std::cerr << "The input graph file must be specified." << std::endl;
             exit(1);
         }
+        if (rand_max && !rand_start) {
+            std::cerr << "--randmax must be used with --randstart."
+                      << std::endl;
+            exit(1);
+        }
         if (zdd_dir && (stb_mode || stw_mode)) {
             // Only the one-directional search saves the ZDDs into files.
             std::cerr << "--zdddir is ignored for --stb and --stw."
