@@ -86,9 +86,31 @@ public:
         return false;
     }
 
+    // Whether the empty edge set is a solution when the graph has no edge.
+    bool isEmptyEdgeSetSolution() const
+    {
+        if (is_tree_ && !is_steiner_) {
+            // A tree is required to have at least one edge, so the only
+            // case left is a spanning tree of a graph with one vertex.
+            return is_spanning_ && num_vertices_ == 1;
+        }
+        if (is_root_) {
+            // Every component, that is, every vertex, must contain
+            // exactly one root.
+            return !hasUncoverableVertex();
+        }
+        return true; // a forest and a Steiner tree accept it
+    }
+
     virtual ZBDD createSolutionSpaceZdd()
     {
         const int m = graph_.edgeSize();
+
+        if (m == 0) {
+            // The frontier-based specs of TdZdd assume at least one edge.
+            // The empty edge set is the only candidate here.
+            return (isEmptyEdgeSetSolution() ? ZBDD(1) : ZBDD(0));
+        }
 
         if (is_spanning_ && hasUncoverableVertex()) {
             if (show_info_) {

@@ -50,17 +50,28 @@ public:
 
     virtual ZBDD createSolutionSpaceZdd()
     {
-        ConnectedInducedSubgraphSpec cis_spec(graph_, true);
-        DdStructure<2> dd_E = DdStructure<2>(cis_spec);
-        dd_E.zddReduce();
+        // The frontier-based spec assumes at least one edge. Without an
+        // edge, no connected induced subgraph has an edge, so the
+        // edge-variable ZDD is the empty family.
+        const bool has_edge = (graph_.edgeSize() > 0);
+
+        DdStructure<2> dd_E;
+        if (has_edge) {
+            ConnectedInducedSubgraphSpec cis_spec(graph_, true);
+            dd_E = DdStructure<2>(cis_spec);
+            dd_E.zddReduce();
+        }
 
         if (is_vertex_variable_) {
             while (BDD_VarUsed() < num_elements_) {
                 BDD_NewVar();
             }
-            // translate E-DD to V-DD
-            ConvEVDD::VariableList vlist(graph_);
-            ZBDD dd_V = ConvEVDD::eToVZdd(dd_E, graph_, vlist);
+            ZBDD dd_V = ZBDD(0);
+            if (has_edge) {
+                // translate E-DD to V-DD
+                ConvEVDD::VariableList vlist(graph_);
+                dd_V = ConvEVDD::eToVZdd(dd_E, graph_, vlist);
+            }
             // The subgraph induced by a single vertex is connected but
             // contains no edge, so it is not represented by the
             // edge-variable ZDD. Add it here.
@@ -69,8 +80,7 @@ public:
             }
             return dd_V;
         } else {
-            ZBDD z = dd_E.evaluate(ToZBDD());
-            return z;
+            return (has_edge ? dd_E.evaluate(ToZBDD()) : ZBDD(0));
         }
     }
 };

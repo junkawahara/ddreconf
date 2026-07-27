@@ -48,6 +48,15 @@ public:
     {
         const int m = graph_.edgeSize();
 
+        if (m == 0) {
+            // The frontier-based specs of TdZdd assume at least one edge.
+            // The empty edge set has no connected component, which is what
+            // nuc == 0 below requires, and every degree is 0, which the
+            // degree constraint of a Steiner cycle allows. (A terminal
+            // incident to no edge has already been rejected by main().)
+            return ZBDD(1);
+        }
+
         DdStructure<2> dd;
 
         int nuc = 0;

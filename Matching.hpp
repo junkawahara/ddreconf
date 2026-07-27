@@ -58,6 +58,14 @@ public:
             return ZBDD(0);
         }
 
+        if (m == 0) {
+            // DegreeConstraint assumes at least one edge. The empty edge
+            // set is the only candidate and is a matching. It is also a
+            // complete matching, because the graph has no vertex here
+            // (the case above has returned otherwise).
+            return ZBDD(1);
+        }
+
         IntRange range((is_complete_ ? 1 : 0), 1);
         DegreeConstraint dc(graph_, &range);
 
