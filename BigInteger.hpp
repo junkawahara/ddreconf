@@ -352,7 +352,6 @@ public:
         std::generate_n(seed_data.data(), seed_data.size(), std::ref(rd));
         std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
         engine_ = std::mt19937(seq);
-    	engine_.seed(time(NULL));
         dis_ = std::uniform_int_distribution<unsigned long long int>(0, 0xffffffffffffffffll);
     }
 
