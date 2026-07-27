@@ -538,6 +538,11 @@ public:
                     }
                     zdd_sequence[j] = ZBDD_Import(fp);
                     fclose(fp);
+                    if (zdd_sequence[j] == ZBDD(-1)) {
+                        std::cerr << "File " << ss.str()
+                                  << " cannot be read as a ZDD." << std::endl;
+                        exit(6);
+                    }
                     //std::cout << "restored " << j << " " << zdd_sequence[j].Size() << std::endl;
                 }
                 for (int j = i; j < i + 1000 && j < static_cast<int>(zdd_sequence.size()) - 1; ++j) {
