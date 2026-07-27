@@ -42,6 +42,17 @@ public:
         }
     }
 
+    // colors_[edge_number] (0 if the color of the edge is not specified)
+    int getColor(int edge_number) const
+    {
+        if (0 <= edge_number
+            && edge_number < static_cast<int>(colors_.size())) {
+            return colors_[edge_number];
+        } else {
+            return 0;
+        }
+    }
+
     int getColorBit(uint64 used_color, int color_number) const
     {
         return ((used_color >> (color_number - 1)) & 1llu);
@@ -61,12 +72,15 @@ public:
     int getChild(uint64& used_color, int level, int value) const
     {
         if (value == 1) {
-            if (colors_[level] > 0) {
-                if (getColorBit(used_color, colors_[level])) {
+            // The edge processed at "level" is the (m_ + 1 - level)-th edge
+            // in the input order, whose color is colors_[m_ + 1 - level].
+            int color = getColor(m_ + 1 - level);
+            if (color > 0) {
+                if (getColorBit(used_color, color)) {
                     return 0; // The subgraph includes two edges with the same color.
                               // Then, return 0-terminal
                 }
-                setColorBit(used_color, colors_[level]);
+                setColorBit(used_color, color);
             }
         }
         if (level == 1) {
