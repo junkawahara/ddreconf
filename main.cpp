@@ -144,6 +144,7 @@ int main(int argc, char** argv) {
 
     Option option;
     int num_vertices = -1;
+    int num_input_edges = 0;
 
 #ifdef STAND_ALONE
 
@@ -167,11 +168,21 @@ int main(int argc, char** argv) {
 
 #ifdef STAND_ALONE
     num_vertices = parse_DIMACS(std::cin, &graph, &start_set, &goal_set,
-                                &root_set, &colors);
+                                &root_set, &colors, &num_input_edges);
 #else
     num_vertices = parse_DIMACS(option.graph_filename.c_str(), &graph,
-                                &start_set, &goal_set, &root_set, &colors);
+                                &start_set, &goal_set, &root_set, &colors,
+                                &num_input_edges);
 #endif
+
+    // tdzdd::Graph removes duplicated edges (including reversed ones),
+    // which shifts the edge numbers of the input file.
+    if (option.isEdgeVariable() && graph.edgeSize() != num_input_edges) {
+        std::cerr << "The input graph has a duplicated edge, "
+                  << "which is not supported for edge-variable problems."
+                  << std::endl;
+        return 1;
+    }
 
     if (option.isEdgeVariable()) {
         if (graph.edgeSize() >= recursion_limit) {

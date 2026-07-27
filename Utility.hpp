@@ -291,11 +291,15 @@ private:
 // The numbers in the s/t lines are stored in start_set/goal_set as is.
 // The caller must translate them into ZDD variables
 // (by VertexMapping::outerSetToVarSet or inverseSet).
+// num_input_edges receives the number of the 'e' lines actually read,
+// which may be larger than graph->edgeSize() because tdzdd::Graph removes
+// duplicated edges.
 int parse_DIMACS(std::istream& ist, Graph* graph,
                  std::set<bddvar>* start_set,
                  std::set<bddvar>* goal_set,
                  std::set<std::string>* root_set,
-                 std::vector<int>* colors)
+                 std::vector<int>* colors,
+                 int* num_input_edges)
 {
     int num_vertices = -1;
     int num_edges = -1;
@@ -391,12 +395,13 @@ int parse_DIMACS(std::istream& ist, Graph* graph,
     }
     graph->update();
 
+    *num_input_edges = current_num_edges;
     return num_vertices;
 }
 
 int parse_DIMACS(const char* filename, Graph* graph, std::set<bddvar>* start_set,
                  std::set<bddvar>* goal_set, std::set<std::string>* root_set,
-                 std::vector<int>* colors)
+                 std::vector<int>* colors, int* num_input_edges)
 {
     std::ifstream ifs;
     ifs.open(filename);
@@ -404,7 +409,8 @@ int parse_DIMACS(const char* filename, Graph* graph, std::set<bddvar>* start_set
         std::cerr << "File " << filename << " cannot be opened." << std::endl;
         exit(1);
     }
-    return parse_DIMACS(ifs, graph, start_set, goal_set, root_set, colors);
+    return parse_DIMACS(ifs, graph, start_set, goal_set, root_set, colors,
+                        num_input_edges);
 }
 
 // The numbers in the s/t lines are stored as is (see parse_DIMACS).
