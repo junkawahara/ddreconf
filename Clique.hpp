@@ -39,7 +39,7 @@ public:
 
     virtual ZBDD createSolutionSpaceZdd()
     {
-        const int n = graph_.vertexSize();
+        const int n = num_elements_; // the number of vertices in the input
         const int m = graph_.edgeSize();
 
         std::vector<bddvar> vararr;
@@ -50,23 +50,27 @@ public:
 
         double start_time = getTime();
 
+        // adjacency matrix over the outer (input) vertex numbers.
+        // Vertices not appearing in any edge are adjacent to no vertex.
+        std::vector<std::vector<bool> > adjacent(n + 1,
+                                                 std::vector<bool>(n + 1,
+                                                                   false));
+        for (int i = 0; i < m; ++i) {
+            const Graph::EdgeInfo& edge = graph_.edgeInfo(i);
+            int vv1 = getVertexNumber(graph_, edge.v1);
+            int vv2 = getVertexNumber(graph_, edge.v2);
+            adjacent[vv1][vv2] = true;
+            adjacent[vv2][vv1] = true;
+        }
+
         ZBDD clique_zdd = sbddh::getPowerSet(vararr);
 
         // Construct the ZDD representing all the families of cliques.
         for (int vv1 = 1; vv1 <= n; ++vv1) {
             for (int vv2 = vv1 + 1; vv2 <= n; ++vv2) {
-                bool found = false;
-                for (int i = 0; i < m; ++i) {
-                    const Graph::EdgeInfo& edge = graph_.edgeInfo(i);
-                    if ((edge.v1 == vv1 && edge.v2 == vv2)
-                        || (edge.v1 == vv2 && edge.v2 == vv1)) {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    int v1 = vertex_mapping_.innerToVar(graph_, vv1);
-                    int v2 = vertex_mapping_.innerToVar(graph_, vv2);
+                if (!adjacent[vv1][vv2]) {
+                    int v1 = vertex_mapping_.outerToVar(vv1);
+                    int v2 = vertex_mapping_.outerToVar(vv2);
                     AdjacentSpec aspec(v1, v2, num_elements_, true);
                     DdStructure<2> dd(aspec);
                     ZBDD zx = dd.evaluate(ToZBDD());
