@@ -442,17 +442,23 @@ public:
                 BDD_GC();
             }
         }
-        int max_card = 0;
+        BigInteger max_card(0);
         int max_card_i = -1;
         for (int i = 0; i <= shortest_length; ++i) {
             int rev = shortest_length - i;
-            int card = (F_[i] & Fg_[rev]).Card();
-            std::cerr << "Card(Zs_" << i << " & Zt_" << rev << ") = " << card << std::endl;
-            if (card > max_card) {
+            // ZBDD::Card() saturates at the 64 bit range, so count the
+            // elements exactly.
+            BigInteger card = ZBDD_CountSolutions(F_[i] & Fg_[rev]);
+            if (show_info_) {
+                std::cerr << "Card(Zs_" << i << " & Zt_" << rev << ") = "
+                          << card << std::endl;
+            }
+            if (max_card < card) {
                 max_card = card;
                 max_card_i = i;
             }
         }
+        // The width is the result of the --stw mode, not progress info.
         std::cerr << "max card = " << max_card << std::endl;
         std::cerr << "max card index = " << max_card_i << std::endl;
         return (found_shortest ? shortest_length : -1);
