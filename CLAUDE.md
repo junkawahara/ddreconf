@@ -23,7 +23,7 @@ There is no test suite and no lint configuration. To smoke-test a change, run ag
 ./ddreconf sample/hc-square-01.col --indset --longest --stfile=sample/hc-square-01_01.dat
 ```
 
-Running `./ddreconf` with no arguments prints the full, up-to-date option list (main.cpp's usage block is more current than README.md — e.g. `--stb`, `--stwidth`, `--vc`, `--ds`, `--stcycle` are not in the README).
+Running `./ddreconf` with no arguments prints the option list; README.md documents the same set in more detail. Keep both in sync when adding an option.
 
 ## Architecture
 
@@ -41,4 +41,4 @@ The pipeline in main.cpp:
 - **Size limit**: the number of variables (vertices or edges, per the regime) must be < 8192 (`recursion_limit`, a SAPPOROBDD restriction enforced in main.cpp).
 - **`STAND_ALONE` define**: main.cpp has an alternate mode (graph from stdin, forced `--st`, quiet) compiled with `-DSTAND_ALONE`; keep both paths working when editing main.cpp.
 - Solver progress/info goes to **stderr**; the reconfiguration sequence itself (`a` lines) goes to **stdout**.
-- Token sliding (`--ts`) is declared but not implemented.
+- Token sliding (`--ts`) is not implemented; `Option::parse` rejects it.
