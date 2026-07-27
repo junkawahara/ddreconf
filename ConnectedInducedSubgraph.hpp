@@ -61,6 +61,12 @@ public:
             // translate E-DD to V-DD
             ConvEVDD::VariableList vlist(graph_);
             ZBDD dd_V = ConvEVDD::eToVZdd(dd_E, graph_, vlist);
+            // The subgraph induced by a single vertex is connected but
+            // contains no edge, so it is not represented by the
+            // edge-variable ZDD. Add it here.
+            for (int v = 1; v <= num_elements_; ++v) {
+                dd_V += sbddh::getSingleton(v);
+            }
             return dd_V;
         } else {
             ZBDD z = dd_E.evaluate(ToZBDD());
