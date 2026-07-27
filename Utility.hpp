@@ -87,6 +87,19 @@ int outerVertexToInner(const Graph& graph, int v)
     return graph.getVertex(ss.str());
 }
 
+// Check whether the vertex named "name" is in graph. Note that a vertex
+// appearing in no edge is not in tdzdd::Graph.
+// graph must have been updated.
+bool isVertexInGraph(const Graph& graph, const std::string& name)
+{
+    for (int v = 1; v <= graph.vertexSize(); ++v) {
+        if (graph.vertexName(v) == name) {
+            return true;
+        }
+    }
+    return false;
+}
+
 // Manages the mapping between outer vertex numbers (in the DIMACS file)
 // and ZDD variables for vertex-variable problems.
 class VertexMapping {

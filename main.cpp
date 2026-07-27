@@ -282,8 +282,12 @@ int main(int argc, char** argv) {
     case R_SP_FOREST:
         for (std::set<std::string>::iterator itor = root_set.begin();
              itor != root_set.end(); ++itor) {
-            graph.setColor(*itor, col);
-            ++col;
+            // A root incident to no edge is not in tdzdd::Graph. It needs
+            // no color because it forms a component by itself.
+            if (isVertexInGraph(graph, *itor)) {
+                graph.setColor(*itor, col);
+                ++col;
+            }
         }
         graph.update();
         space = new ForestOrTree(graph, num_vertices, false, true, true, false,
@@ -295,6 +299,11 @@ int main(int argc, char** argv) {
     case STEINER_CYCLE:
         for (std::set<std::string>::iterator itor = root_set.begin();
              itor != root_set.end(); ++itor) {
+            if (!isVertexInGraph(graph, *itor)) {
+                std::cerr << "Terminal " << *itor
+                          << " is incident to no edge." << std::endl;
+                return 1;
+            }
             graph.setColor(*itor, 1);
         }
         graph.update();
