@@ -138,9 +138,20 @@ inline int ZBDD_GetIthSet(const ZBDD& f, const BigInteger& index, const ZBDD_Cou
 inline std::set<bddvar> ZBDD_SampleRandomly(const ZBDD& f, const ZBDD_CountMap& cmap, BigIntegerRandom& random)
 {
     std::set<bddvar> result_set;
-    BigInteger index(random.GetRand(cmap.at(f.GetID())));
+    bddp p = f.GetID();
+    // ZBDD_CountSolutions does not register the constant ZDDs in cmap.
+    if (p == bddempty) { // the family is empty; no set can be sampled
+        std::cerr << "Cannot sample a set from the empty family." << std::endl;
+        exit(1);
+    } else if (p == bddsingle) { // the family is {the empty set}
+        return result_set;
+    }
+    BigInteger index(random.GetRand(cmap.at(p)));
     index += 1;
     //std::cout << cmap.at(f.GetID()).GetString() << ", index: " << index.GetString() << std::endl;
-    ZBDD_GetIthSet(f, index, cmap, &result_set);
+    if (ZBDD_GetIthSet(f, index, cmap, &result_set) < 0) {
+        std::cerr << "Failed to sample a set from the family." << std::endl;
+        exit(1);
+    }
     return result_set;
 }
