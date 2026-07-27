@@ -64,10 +64,9 @@ public:
             IntRange zero_or_two(0, 2, 2);
             DegreeConstraint dc(graph_);
             for (int v = 1; v <= graph_.vertexSize(); ++v) {
-                std::ostringstream oss;
-                oss << v;
-                std::string vs = oss.str();
-                dc.setConstraint(vs, &zero_or_two);
+                // v is a vertex number inside tdzdd::Graph, which is
+                // not the vertex number in the input file.
+                dc.setConstraint(graph_.vertexName(v), &zero_or_two);
             }
             dd = DdStructure<2>(dc);
             dd.zddSubset(fbs);

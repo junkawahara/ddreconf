@@ -97,9 +97,9 @@ public:
             // dc means the degree of each vertex is at least one.
             DegreeConstraint dc(graph_);
             for (int v = 1; v <= graph_.vertexSize(); ++v) {
-                std::ostringstream oss;
-                oss << v;
-                std::string vs = oss.str();
+                // v is a vertex number inside tdzdd::Graph, which is
+                // not the vertex number in the input file.
+                std::string vs = graph_.vertexName(v);
                 // The degree of the roots can be zero.
                 if (!is_root_ || root_set_.count(vs) == 0) { // not found
                     dc.setConstraint(vs, &at_least_one);
