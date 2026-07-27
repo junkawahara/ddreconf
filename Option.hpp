@@ -60,6 +60,7 @@ public:
     {
         return sol_kind == MATCHING
             || sol_kind == CMATCHING
+            || sol_kind == PATH
             || sol_kind == TREE
             || sol_kind == SP_TREE
             || sol_kind == FOREST
