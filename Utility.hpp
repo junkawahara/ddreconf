@@ -260,8 +260,6 @@ int parse_DIMACS(std::istream& ist, Graph* graph,
     int num_vertices = -1;
     int num_edges = -1;
     int current_num_edges = 0;
-    bool read_s = false;
-    bool read_t = false;
 
     std::string s;
     int line_number = 0;
@@ -306,11 +304,6 @@ int parse_DIMACS(std::istream& ist, Graph* graph,
             while (iss >> bv) {
                 vec->insert(bv);
             }
-            if (s[0] == 's') {
-                read_s = true;
-            } else {
-                read_t = true;
-            }
         } else if (s[0] == 'r') {
             std::istringstream iss(s);
             std::string dummy;
@@ -333,12 +326,6 @@ int parse_DIMACS(std::istream& ist, Graph* graph,
             std::cerr << "illegal input format in line "
                       << line_number << std::endl;
             exit(1);
-        }
-        if (read_s && read_t &&
-            num_edges >= 0 && current_num_edges >= num_edges) {
-            // We will not read input anymore.
-            //std::cerr << "break" << std::endl;
-            break;
         }
     }
     graph->update();
