@@ -214,6 +214,12 @@ public:
             std::cerr << "The input graph file must be specified." << std::endl;
             exit(1);
         }
+        if (zdd_dir && (stb_mode || stw_mode)) {
+            // Only the one-directional search saves the ZDDs into files.
+            std::cerr << "--zdddir is ignored for --stb and --stw."
+                      << std::endl;
+            zdd_dir = false;
+        }
         if ((vertex_order != VO_LEAVE || vorder_out)
             && sol_kind != IND_SET && sol_kind != CLIQUE
             && sol_kind != VERTEX_COVER && sol_kind != DOMINATING_SET) {

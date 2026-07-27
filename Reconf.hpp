@@ -43,6 +43,9 @@ private:
     BigIntegerRandom& random_;
     bool is_edge_variable_;
     bool is_zdd_store_;
+    // whether F_ has actually been exported to files (only reconfigure()
+    // does it; backtrack() must not import files that were never written)
+    bool is_zdd_stored_;
     std::string zdd_dirname_;
     bool show_info_;
     bool show_info_verbose_;
@@ -59,6 +62,7 @@ public:
           model_(TJ),
           random_(random),
           is_edge_variable_(is_edge_variable), is_zdd_store_(false),
+          is_zdd_stored_(false),
           show_info_(show_info),
           show_info_verbose_(false), is_gc_(is_gc), graph_(graph),
           vertex_mapping_(vertex_mapping) {}
@@ -225,6 +229,7 @@ public:
                         //std::cout << "erased " << j << " " << F_[j].Size() << std::endl;
                         F_[j] = zbdd_null;
                     }
+                    is_zdd_stored_ = true;
                     BDD_GC();
                 }
             }
@@ -516,7 +521,7 @@ public:
             } else {
                 std::cerr << "backtrack failed" << std::endl;
             }
-            if (is_zdd_store_ && i >= 1002 && i % 1000 == 2) {
+            if (is_zdd_stored_ && i >= 1002 && i % 1000 == 2) {
                 for (int j = i - 1000 - 1; j < i - 1; ++j) {
                     std::stringstream ss;
                     ss << zdd_dirname_ << j;
