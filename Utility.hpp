@@ -313,13 +313,24 @@ int parse_DIMACS(std::istream& ist, Graph* graph,
                 root_set->insert(root);
             }
         } else if (s[0] == 'y') {
+            if (num_edges < 0) {
+                std::cerr << "'y' line must appear after 'p' line"
+                          << std::endl;
+                exit(1);
+            }
             std::string dummy;
             std::istringstream iss(s);
             int edge_number;
             int color;
-            iss >> dummy >> edge_number >> color;
-            if (static_cast<int>(colors->size()) < edge_number + 1) {
-                colors->resize(edge_number + 1);
+            if (!(iss >> dummy >> edge_number >> color)) {
+                std::cerr << "illegal input format in line "
+                          << line_number << std::endl;
+                exit(1);
+            }
+            if (!(1 <= edge_number && edge_number <= num_edges)) {
+                std::cerr << "Edge number " << edge_number << " in line "
+                          << line_number << " is out of range." << std::endl;
+                exit(1);
             }
             (*colors)[edge_number] = color;
         } else {
