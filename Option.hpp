@@ -208,7 +208,9 @@ public:
                 if (graph_filename.empty()) {
                     graph_filename = std::string(argv[i]);
                 } else {
-                    std::cerr << "The input graph cannot be speficied twice." << std::endl;
+                    std::cerr << "The input graph cannot be specified twice."
+                              << std::endl;
+                    exit(1);
                 }
             }
         }
