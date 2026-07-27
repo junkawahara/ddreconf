@@ -123,7 +123,9 @@ public:
                 model = TJ;
             } else if (std::string(argv[i]) == std::string("--ts")
                        || std::string(argv[i]) == std::string("--tokenslide")) {
-                model = TS;
+                std::cerr << "The token sliding model is not implemented yet."
+                          << std::endl;
+                exit(1);
             } else if (std::string(argv[i]).find(std::string("--tar=")) == 0) {
                 model = TAR;
                 tar_k = atoi(std::string(argv[i]).substr(6).c_str());
