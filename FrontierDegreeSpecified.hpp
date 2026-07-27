@@ -143,6 +143,18 @@ public:
             exit(1);
         }
 
+        for (size_t d = 0; d < degRanges_.size(); ++d) {
+            // The counters of the degree classes are uchar and are
+            // incremented while they are below the upper bound, so an
+            // upper bound above 255 can wrap them around to 0.
+            if (storingList_[d] && degRanges_[d]->upperBound() > UCHAR_MAX) {
+                std::cerr << "The upper bound of the number of degree-"
+                          << d << " vertices must be at most "
+                          << UCHAR_MAX << "." << std::endl;
+                exit(1);
+            }
+        }
+
         if (storingList_[0]) {
             // getChild() may accept an edge set before all the vertices
             // have left the frontier. The vertices that have not left it
