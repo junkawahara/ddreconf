@@ -189,7 +189,9 @@ public:
         ZBDD start_zdd = getSingleSet(start_set);
         F_.push_back(start_zdd);
 
-        if (start_set == goal_set) {
+        // In the LONGEST mode, goal_set is a dummy empty set and must not
+        // be compared with start_set.
+        if (mode_ == ST && start_set == goal_set) {
             return 0;
         }
 
