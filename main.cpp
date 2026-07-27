@@ -227,14 +227,6 @@ int main(int argc, char** argv) {
         }
     }
 
-    if (option.st_mode && start_set == goal_set) {
-        // Output for 0 step
-        std::cout << "a ";
-        printSet(std::cout, start_set, vertex_mapping,
-                 option.isEdgeVariable());
-        return 0;
-    }
-
     if (option.isEdgeVariable()) {
         // change edge IDs to SAPPOROBDD variable numbers
         // from 1,...,m to m,...,1

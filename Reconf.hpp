@@ -329,6 +329,10 @@ public:
         ZBDD goal_zdd = getSingleSet(goal_set);
         Fg_.push_back(goal_zdd);
 
+        if (start_set == goal_set) {
+            return 0;
+        }
+
         int step;
         for (step = 1; ; ++step) {
             if (show_info_) {
@@ -387,6 +391,11 @@ public:
         F_.push_back(start_zdd);
         ZBDD goal_zdd = getSingleSet(goal_set);
         Fg_.push_back(goal_zdd);
+
+        if (start_set == goal_set) {
+            found_shortest = true;
+            shortest_length = 0;
+        }
 
         int step;
         for (step = 1; step <= shortest_length * 2; ++step) {
