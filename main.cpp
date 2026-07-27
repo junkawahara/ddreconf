@@ -248,7 +248,7 @@ int main(int argc, char** argv) {
     }
 
     int col = 1;
-    SolutionSpace* space;
+    SolutionSpace* space = NULL;
     ZBDD solution_space_zdd;
     switch (option.sol_kind) {
     case IND_SET:
@@ -392,6 +392,7 @@ int main(int argc, char** argv) {
     }
 
     if (!(option.st_mode || option.longest_mode)) {
+        delete space;
         return 0;
     }
 
@@ -480,5 +481,6 @@ int main(int argc, char** argv) {
         std::cerr << "Reconfiguration time = "
                   << (end_time - start_time) << std::endl;
     }
+    delete space;
     return 0;
 }

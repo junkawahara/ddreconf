@@ -29,6 +29,8 @@ protected:
 public:
     SolutionSpace(int num_elements) : num_elements_(num_elements) { }
 
+    virtual ~SolutionSpace() { }
+
     int getNumElements()
     {
         return num_elements_;
