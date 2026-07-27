@@ -55,18 +55,25 @@ public:
 
         ZBDD dominating_set_zdd = sbddh::getPowerSet(vararr);
 
+        // closed neighborhood of each vertex, over the outer (input) vertex
+        // numbers. A vertex appearing in no edge is dominated only by itself.
+        std::vector<std::set<int> > neighbors(num_elements_ + 1);
+        for (int j = 0; j < m; ++j) {
+            const Graph::EdgeInfo& edge = graph_.edgeInfo(j);
+            int vv1 = getVertexNumber(graph_, edge.v1);
+            int vv2 = getVertexNumber(graph_, edge.v2);
+            neighbors[vv1].insert(vv2);
+            neighbors[vv2].insert(vv1);
+        }
+
         for (int v = 1; v <= num_elements_; ++v) {
             std::set<int> s;
-            s.insert(vertex_mapping_.innerToVar(graph_, v));
+            s.insert(vertex_mapping_.outerToVar(v));
 
             // insert all the neighbors of v into s
-            for (int j = 0; j < m; ++j) {
-                const Graph::EdgeInfo& edge = graph_.edgeInfo(j);
-                if (edge.v1 == v) {
-                    s.insert(vertex_mapping_.innerToVar(graph_, edge.v2));
-                } else if (edge.v2 == v) {
-                    s.insert(vertex_mapping_.innerToVar(graph_, edge.v1));
-                }
+            for (std::set<int>::const_iterator itor = neighbors[v].begin();
+                 itor != neighbors[v].end(); ++itor) {
+                s.insert(vertex_mapping_.outerToVar(*itor));
             }
             VariableConditionSpec vcspec(s, num_elements_,
                                          VariableConditionKind::AT_LEAST_ONE);
