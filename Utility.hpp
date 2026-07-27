@@ -311,6 +311,9 @@ int parse_DIMACS(std::istream& ist, Graph* graph,
     int line_number = 0;
     while (ist && std::getline(ist, s)) {
         ++line_number;
+        if (s.find_first_not_of(" \t\r") == std::string::npos) {
+            continue; // skip an empty line
+        }
         if (s[0] == 'c') {
             // skip comment line
         } else if (s[0] == 'p') {
