@@ -76,7 +76,8 @@ public:
         }
 
         if (is_connected_) {
-            ConnectedInducedSubgraph cis(graph_, true, show_info_);
+            ConnectedInducedSubgraph cis(graph_, num_elements_, true,
+                                         show_info_);
             independent_set_zdd &= cis.createSolutionSpaceZdd();
         }
 

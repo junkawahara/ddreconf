@@ -37,10 +37,14 @@ private:
     bool show_info_ = false;
 
 public:
-    ConnectedInducedSubgraph(const tdzdd::Graph& graph,
+    // num_vertices is the number of vertices in the input graph and is
+    // used only when is_vertex_variable is true.
+    ConnectedInducedSubgraph(const tdzdd::Graph& graph, int num_vertices,
          bool is_vertex_variable,
          bool show_info)
-        : SolutionSpace(graph.edgeSize()), graph_(graph),
+        : SolutionSpace(is_vertex_variable ? num_vertices
+                                           : graph.edgeSize()),
+          graph_(graph),
           is_vertex_variable_(is_vertex_variable),
           show_info_(show_info) { }
 
@@ -51,7 +55,7 @@ public:
         dd_E.zddReduce();
 
         if (is_vertex_variable_) {
-            while (BDD_VarUsed() < graph_.edgeSize() + graph_.vertexSize()) {
+            while (BDD_VarUsed() < num_elements_) {
                 BDD_NewVar();
             }
             // translate E-DD to V-DD

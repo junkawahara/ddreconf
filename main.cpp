@@ -314,10 +314,12 @@ int main(int argc, char** argv) {
         }
         break;
     case CIS_E:
-        space = new ConnectedInducedSubgraph(graph, false, option.show_info);
+        space = new ConnectedInducedSubgraph(graph, num_vertices, false,
+                                             option.show_info);
         break;
     case CIS_V:
-        space = new ConnectedInducedSubgraph(graph, true, option.show_info);
+        space = new ConnectedInducedSubgraph(graph, num_vertices, true,
+                                             option.show_info);
         break;
     case CONNECTED_DOMINATING_SET:
         space = new DominatingSet(graph, num_vertices, true, option.show_info,
