@@ -71,6 +71,14 @@ private:
         //data[fm_.vertexToPos(v) * 2 + 1] = c;
     }
 
+    // This function erases deg and comp of v, which are never used again.
+    // The erased value must be a constant so that the states of the
+    // vertices that have left the frontier are shared.
+    void eraseDegComp(FrontierDSData* data, int v) const {
+        data[fm_.vertexToPos(v) * 2] = static_cast<uchar>(-1);
+        data[fm_.vertexToPos(v) * 2 + 1] = static_cast<uchar>(-1);
+    }
+
     void incrementFixedDeg(FrontierDSData* data, int d) const {
         ++data[fixedDegStart_ + d];
     }
@@ -271,8 +279,7 @@ public:
             }
             // Since deg and comp of v are never used until the end,
             // we erase the values.
-            setDeg(data, v, -1);
-            setComp(data, v, -1);
+            eraseDegComp(data, v);
         }
         if (level == 1) {
             // If we come here, the edge set is empty (taking no edge).
