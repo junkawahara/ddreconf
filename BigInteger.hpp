@@ -316,6 +316,23 @@ inline bool operator<(const BigInteger& integer1, const BigInteger& integer2)
                               large_digit2, small_digit2);
 }
 
+// Without these operators, a comparison of two BigIntegers is performed
+// by the implicit conversion into double, that is, with 53 bit precision.
+inline bool operator>(const BigInteger& integer1, const BigInteger& integer2)
+{
+    return integer2 < integer1;
+}
+
+inline bool operator<=(const BigInteger& integer1, const BigInteger& integer2)
+{
+    return !(integer2 < integer1);
+}
+
+inline bool operator>=(const BigInteger& integer1, const BigInteger& integer2)
+{
+    return !(integer1 < integer2);
+}
+
 class BigIntegerRandom {
 
 //extern "C" {
