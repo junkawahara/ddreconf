@@ -53,12 +53,23 @@ std::string getCard(ZBDD f)
 //    return ZBDD_ID(swap_element(f.GetID(), n));
 //}
 
-bool checkVertexFormat(const std::string& vertex, int num_vertices)
+bool isNonNegativeInteger(const std::string& s)
 {
-    for (size_t i = 0; i < vertex.length(); ++i) {
-        if (!std::isdigit(vertex[i])) { // not digit
+    if (s.empty()) {
+        return false;
+    }
+    for (size_t i = 0; i < s.length(); ++i) {
+        if (!std::isdigit(s[i])) { // not digit
             return false;
         }
+    }
+    return true;
+}
+
+bool checkVertexFormat(const std::string& vertex, int num_vertices)
+{
+    if (!isNonNegativeInteger(vertex)) {
+        return false;
     }
     std::istringstream iss(vertex);
     int v;
@@ -320,8 +331,19 @@ int parse_DIMACS(std::istream& ist, Graph* graph,
             std::string st;
             std::istringstream iss(s);
             iss >> st; // skip first char
-            iss >> num_vertices; // obtain the number of vertices
-            iss >> num_edges; // obtain the number of edges
+            iss >> st;
+            if (!isNonNegativeInteger(st)) {
+                // the standard DIMACS header "p edge <n> <m>"
+                iss >> st;
+            }
+            std::istringstream iss_n(st);
+            // obtain the numbers of vertices and edges
+            if (!(iss_n >> num_vertices) || !(iss >> num_edges)
+                || num_vertices < 0 || num_edges < 0) {
+                std::cerr << "illegal input format in line "
+                          << line_number << std::endl;
+                exit(1);
+            }
             colors->resize(0);
             colors->resize(num_edges + 1, 0); // +1 for colors[0]. zero padding
         } else if (s[0] == 'e') {
