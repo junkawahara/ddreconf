@@ -175,6 +175,9 @@ public:
             for (int i = 0; i < stateSize_; ++i) {
                 state[i] = 0;
             }
+            if (conf.node == 0) { // the given family is empty
+                return 0;
+            }
             return ((conf.node == 1) ? -1 : m_ + n_);
         }
 
