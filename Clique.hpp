@@ -85,16 +85,14 @@ public:
         double end_time = getTime();
 
         if (show_info_) {
-            std::cout << "ZDD for cliques time = " << (end_time - start_time) << std::endl;
-        }
-
-        std::cout << std::fixed;
-        std::cout << std::setprecision(6);
-
-        if (show_info_) {
-            std::cout << "clique ZDD size = "
+            // The progress information goes to stderr; stdout is reserved
+            // for the 'a' lines.
+            std::cerr << std::fixed << std::setprecision(6);
+            std::cerr << "ZDD for cliques time = "
+                      << (end_time - start_time) << std::endl;
+            std::cerr << "clique ZDD size = "
                       << clique_zdd.Size() << std::endl;
-            std::cout << "# of cliques = "
+            std::cerr << "# of cliques = "
                       << getCard(clique_zdd) << std::endl;
         }
         return clique_zdd;
