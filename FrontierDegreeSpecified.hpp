@@ -143,7 +143,16 @@ public:
             exit(1);
         }
 
-        // todo: check all the degrees is at most 256
+        if (storingList_[0]) {
+            // getChild() may accept an edge set before all the vertices
+            // have left the frontier. The vertices that have not left it
+            // are known to have degree 0 there, but they are not counted,
+            // so a constraint on the number of degree-0 vertices would be
+            // checked against a wrong count.
+            std::cerr << "The number of degree-0 vertices cannot be "
+                      << "constrained." << std::endl;
+            exit(1);
+        }
 
         setArraySize(fixedDegStart_ + degRanges_.size());
     }
