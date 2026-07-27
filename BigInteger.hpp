@@ -40,6 +40,9 @@
 #include <sstream>
 #include <array>
 #include <functional>
+#include <algorithm>
+#include <cassert>
+#include <random>
 
 class BigDecimal {
 private:
@@ -401,8 +404,6 @@ public:
         return ret;
     }
 };
-
-#include <cassert>
 
 void TestBigInteger()
 {
