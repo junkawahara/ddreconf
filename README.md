@@ -146,6 +146,12 @@ The following finds a reconfiguration sequence from a given s to t.
 ./ddreconf sample/hc-toyyes-01.col --indset --st --stfile=sample/hc-toyyes-01_01.dat
 ```
 
+It finds the same kind of sequence, but searches from both s and t.
+
+```bash
+./ddreconf sample/hc-toyyes-01.col --indset --bidirectional --stfile=sample/hc-toyyes-01_01.dat
+```
+
 It finds a longest reconfiguration sequence from a given s (t in the dat file is ignored).
 
 ```bash
