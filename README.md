@@ -73,13 +73,13 @@ standard error.
 * `--randstart` Generates s (starting set) randomly.
 * `--randmax` When generating s (the starting set) randomly, generates the starting set with the maximum number of elements. Must be used with the `--randstart` option.
 * `--st` Finds the shortest reconfiguration sequence from s to t.
-* `--stb` Finds the shortest reconfiguration sequence from s to t, searching from s and from t alternately.
+* `--bidirectional` `--bidir` Finds the shortest reconfiguration sequence from s to t, like `--st`, but searches from both ends at once. It alternately advances one step from the s side and one step from the t side, and stops as soon as the two sides reach a common solution. Each side then covers only about half of the distance, which is usually faster and uses less memory than `--st`. `--stb` is the old name of this option and still works.
 * `--stw` `--stwidth` Finds the shortest reconfiguration sequence from s to t and computes the width of the solution space graph, that is, the largest number of solutions that are on a shortest sequence and at the same distance from s.
 * `--stfile=<file_name>` Specifies a file containing the data for s and t.
 * `--longest` Finds a longest shortest-path from s, that is, a shortest sequence from s to a solution farthest from s (t is ignored).
 * `--enum` Prints all the elements of the solution space, one per line, as the vertex/edge numbers of the input file.
 * `--rainbow` Requires the edges of a solution to have distinct colors, given by the `y` lines. Supported for `--forest`, `--tree`, `--sptree`, `--rspforest` and `--sttree`.
-* `--zdddir=<dir>` Saves the intermediate ZDDs of a long `--st` search into files to reduce the memory usage. `<dir>` is prefixed to the file names, so it normally ends with a separator (e.g. `--zdddir=/tmp/zdd/`). Ignored for `--stb` and `--stw`.
+* `--zdddir=<dir>` Saves the intermediate ZDDs of a long `--st` search into files to reduce the memory usage. `<dir>` is prefixed to the file names, so it normally ends with a separator (e.g. `--zdddir=/tmp/zdd/`). Ignored for `--bidirectional` and `--stwidth`.
 * `--gc` Runs the garbage collection of the ZDD library periodically.
 * `--vorder=<order>` Specifies the ZDD variable order of vertices. `<order>` is one of `leave` (default; the order in which vertices leave the frontier), `asc` (ascending order of vertex numbers from the ZDD root), and `desc` (descending order). Supported only for `--indset`, `--clique`, `--vc`, and `--ds`.
 * `--vorderfile=<file>` Specifies the ZDD variable order of vertices by a file. The file contains a permutation of the vertex numbers 1, ..., n, separated by whitespace or newlines, listed from the ZDD root side (that is, the first listed vertex is decided first). Lines beginning with `c` are ignored as comments. Supported only for `--indset`, `--clique`, `--vc`, and `--ds`.
@@ -87,8 +87,9 @@ standard error.
 * `--info` Outputs detailed information about the program execution. On by default.
 * `-q` `--quiet` Does not output detailed information about the program execution.
 
-If none of `--st`, `--stb`, `--stw` and `--longest` is specified, only
-the solution space ZDD is constructed (which `--enum` can print).
+If none of `--st`, `--bidirectional`, `--stwidth` and `--longest` is
+specified, only the solution space ZDD is constructed (which `--enum`
+can print).
 
 ### Model
 

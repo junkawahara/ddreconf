@@ -91,7 +91,8 @@ int main(int argc, char** argv) {
                   << "number of elements (with --randstart)" << std::endl;
         std::cout << "  --st: computes the reconf sequence from s to t"
                   << std::endl;
-        std::cout << "  --stb: computes the reconf sequence from s to t in the bidirection"
+        std::cout << "  --bidirectional (--bidir, --stb): computes the reconf "
+                  << "sequence from s to t by searching from both s and t"
                   << std::endl;
         std::cout << "  --stwidth: computes the width of the solution space graph"
                   << std::endl;
@@ -457,10 +458,10 @@ int main(int argc, char** argv) {
         reconf.setSolutionSpaceZddTar(solution_space_zdd, option.tar_k);
     }
 
-    if (option.stb_mode) {
+    if (option.bidirectional_mode) {
         if (option.show_info) {
             std::cerr << "Start searching a reconfiguration sequence "
-                      << "from s to t in the bidirection"
+                      << "from s to t, from both ends"
                       << std::endl;
         }
         reconf.findReconfSeqBoth(start_set, goal_set);

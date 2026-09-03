@@ -35,7 +35,7 @@ public:
     bool rand_max = false;
     bool is_enum = false;
     bool st_mode = false;
-    bool stb_mode = false;
+    bool bidirectional_mode = false;
     bool stw_mode = false;
     bool st_file = false;
     bool zdd_dir = false;
@@ -96,9 +96,12 @@ public:
                 is_enum = true;
             } else if (std::string(argv[i]) == std::string("--st")) {
                 st_mode = true;
-            } else if (std::string(argv[i]) == std::string("--stb")) {
+            } else if (std::string(argv[i]) == std::string("--bidirectional")
+                       || std::string(argv[i]) == std::string("--bidir")
+                       // --stb is the old name, kept for compatibility
+                       || std::string(argv[i]) == std::string("--stb")) {
                 st_mode = true;
-                stb_mode = true;
+                bidirectional_mode = true;
             } else if (std::string(argv[i]) == std::string("--stw")
                        || std::string(argv[i]) == std::string("--stwidth")) {
                 st_mode = true;
@@ -223,9 +226,9 @@ public:
                       << std::endl;
             exit(1);
         }
-        if (zdd_dir && (stb_mode || stw_mode)) {
+        if (zdd_dir && (bidirectional_mode || stw_mode)) {
             // Only the one-directional search saves the ZDDs into files.
-            std::cerr << "--zdddir is ignored for --stb and --stw."
+            std::cerr << "--zdddir is ignored for --bidirectional and --stwidth."
                       << std::endl;
             zdd_dir = false;
         }
